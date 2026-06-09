@@ -1,0 +1,25 @@
+{
+  "type": "design",
+  "title": "Platport Redesign",
+  "prompt": "帮我重新设计这个网站。保存到 designs/platport-redesign，不使用设计系统，现代高级感，1 个深入方案。",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "Platport Redesign": {
+      "versions": [
+        {
+          "path": "Platport Redesign.html",
+          "createdAt": "2026-06-09T00:00:00.000Z",
+          "status": "needs-review",
+          "subtitle": "现代高级感官网 redesign 高保真交互原型",
+          "viewport": {
+            "width": 1440,
+            "height": 1100
+          }
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-06-09T00:00:00.000Z",
+  "updatedAt": "2026-06-09T00:00:00.000Z"
+}

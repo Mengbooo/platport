@@ -1,0 +1,1505 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Platport Vercel Style Mockup</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fafafa;
+        --surface: #fff;
+        --surface-soft: #f7f7f7;
+        --ink: #111;
+        --muted: #666;
+        --faint: #8a8a8a;
+        --line: #e5e5e5;
+        --line-strong: #d4d4d4;
+        --black: #000;
+        --blue: #0070f3;
+        --green: #30d158;
+        --amber: #f5a524;
+        --radius: 8px;
+        --mono:
+          "SFMono-Regular", ui-monospace, "Cascadia Code", "Liberation Mono",
+          Menlo, monospace;
+        --sans:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        --serif:
+          "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", Georgia,
+          serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        overflow: hidden;
+        background:
+          linear-gradient(#f1f1f1 1px, transparent 1px),
+          linear-gradient(90deg, #f1f1f1 1px, transparent 1px), var(--bg);
+        background-size: 32px 32px;
+        color: var(--ink);
+        font-family: var(--sans);
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+        letter-spacing: 0;
+      }
+
+      .mockup {
+        --platform-rail-width: 246px;
+        display: flex;
+        width: 2048px;
+        height: 1152px;
+        flex-direction: column;
+        background: rgba(250, 250, 250, 0.94);
+      }
+
+      .mockup[data-sidebar="collapsed"] {
+        --platform-rail-width: 72px;
+      }
+
+      .topbar {
+        display: flex;
+        height: 72px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(18px);
+      }
+
+      .brand {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 14px;
+        padding-left: 28px;
+      }
+
+      .mark {
+        position: relative;
+        display: grid;
+        width: 40px;
+        height: 40px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--black);
+        color: #fff;
+      }
+
+      .mark svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .brand-copy {
+        min-width: 0;
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand strong {
+        display: block;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 650;
+        line-height: 1.15;
+      }
+
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.2;
+      }
+
+      .dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 99px;
+        background: #c7c7c7;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        height: 22px;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 9px;
+        background: #fff;
+        color: #333;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .status-pill::before {
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--green);
+        content: "";
+      }
+
+      .top-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-right: 28px;
+      }
+
+      .btn {
+        display: inline-flex;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: 6px;
+        padding: 0 15px;
+        background: #fff;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 520;
+        white-space: nowrap;
+      }
+
+      .btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .btn.primary {
+        border-color: var(--black);
+        background: var(--black);
+        color: #fff;
+      }
+
+      .btn.icon {
+        width: 40px;
+        padding: 0;
+      }
+
+      .workbench {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: var(--platform-rail-width) 380px minmax(0, 1fr) 356px;
+        transition: grid-template-columns 180ms ease;
+      }
+
+      .platform-rail {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        min-height: 0;
+        border-right: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .rail-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 34px;
+        gap: 10px;
+        align-items: center;
+        height: 64px;
+        border-bottom: 1px solid var(--line);
+        padding: 0 14px;
+      }
+
+      .rail-brand {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .rail-mark,
+      .platform-icon,
+      .rail-toggle {
+        display: grid;
+        place-items: center;
+        border-radius: 7px;
+      }
+
+      .rail-mark {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 auto;
+        border: 1px solid #111;
+        background: #111;
+        color: #fff;
+      }
+
+      .rail-mark svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .rail-title {
+        min-width: 0;
+      }
+
+      .rail-title strong,
+      .rail-title span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .rail-title strong {
+        color: #111;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .rail-title span {
+        margin-top: 2px;
+        color: #777;
+        font-size: 11px;
+      }
+
+      .rail-toggle {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: #555;
+      }
+
+      .rail-toggle svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 180ms ease;
+      }
+
+      .platform-list {
+        display: grid;
+        align-content: start;
+        gap: 6px;
+        min-height: 0;
+        overflow: hidden;
+        padding: 10px;
+      }
+
+      .platform-item {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 48px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 6px;
+        background: transparent;
+        color: #111;
+      }
+
+      .platform-item.active {
+        border-color: #111;
+        background: #fafafa;
+        box-shadow: inset 0 0 0 1px #111;
+      }
+
+      .platform-icon {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: #222;
+      }
+
+      .platform-item.active .platform-icon {
+        border-color: #111;
+        background: #111;
+        color: #fff;
+      }
+
+      .platform-icon svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      .platform-text {
+        min-width: 0;
+      }
+
+      .platform-text strong,
+      .platform-text span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .platform-text strong {
+        color: #111;
+        font-size: 13px;
+        font-weight: 620;
+      }
+
+      .platform-text span {
+        margin-top: 2px;
+        color: #777;
+        font-size: 11px;
+      }
+
+      .platform-badge {
+        display: inline-flex;
+        height: 22px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 7px;
+        background: #fff;
+        color: #777;
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .rail-footer {
+        border-top: 1px solid var(--line);
+        padding: 12px 14px;
+      }
+
+      .rail-footer strong,
+      .rail-footer span {
+        display: block;
+      }
+
+      .rail-footer strong {
+        color: #111;
+        font-size: 12px;
+        font-weight: 620;
+      }
+
+      .rail-footer span {
+        margin-top: 3px;
+        color: #777;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .mockup[data-sidebar="collapsed"] .rail-header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 0 10px;
+      }
+
+      .mockup[data-sidebar="collapsed"] .rail-title,
+      .mockup[data-sidebar="collapsed"] .platform-text,
+      .mockup[data-sidebar="collapsed"] .platform-badge,
+      .mockup[data-sidebar="collapsed"] .rail-footer {
+        display: none;
+      }
+
+      .mockup[data-sidebar="collapsed"] .rail-brand {
+        display: none;
+      }
+
+      .mockup[data-sidebar="collapsed"] .rail-toggle svg {
+        transform: rotate(180deg);
+      }
+
+      .mockup[data-sidebar="collapsed"] .platform-list {
+        justify-items: center;
+        padding: 10px 8px;
+      }
+
+      .mockup[data-sidebar="collapsed"] .platform-item {
+        grid-template-columns: 34px;
+        width: 42px;
+        min-height: 42px;
+        justify-content: center;
+        padding: 3px;
+      }
+
+      .sidebar,
+      .inspector {
+        min-height: 0;
+        background: #fff;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+      }
+
+      .inspector {
+        border-left: 1px solid var(--line);
+      }
+
+      .panel-header {
+        display: flex;
+        height: 64px;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        padding: 0 22px;
+      }
+
+      .panel-title {
+        display: grid;
+        gap: 3px;
+      }
+
+      .panel-title strong {
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      .panel-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .kicker {
+        color: var(--faint);
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+
+      .editor-body {
+        display: grid;
+        height: calc(1152px - 72px - 64px);
+        grid-template-rows: auto 1fr;
+        min-height: 0;
+        padding: 18px;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #5f5f5f;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .input {
+        display: flex;
+        min-height: 42px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0 12px;
+        background: #fff;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 560;
+      }
+
+      .textarea-shell {
+        position: relative;
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .textarea-tools {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        padding: 0 10px;
+        background: #fbfbfb;
+      }
+
+      .mini-tools {
+        display: flex;
+        gap: 4px;
+      }
+
+      .tool-icon {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        background: transparent;
+        color: #555;
+      }
+
+      .tool-icon.active {
+        border-color: var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .tool-icon svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .draft-text {
+        height: calc(100% - 40px);
+        overflow: hidden;
+        padding: 18px 16px 24px;
+        color: #1a1a1a;
+        font-family: var(--mono);
+        font-size: 15px;
+        line-height: 1.82;
+        white-space: pre-wrap;
+      }
+
+      .draft-text b {
+        color: #000;
+        font-weight: 650;
+      }
+
+      .canvas {
+        min-width: 0;
+        min-height: 0;
+        background:
+          linear-gradient(#ededed 1px, transparent 1px),
+          linear-gradient(90deg, #ededed 1px, transparent 1px), #fafafa;
+        background-size: 34px 34px;
+      }
+
+      .canvas-header {
+        display: flex;
+        height: 64px;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+        background: rgba(250, 250, 250, 0.92);
+        padding: 0 22px;
+      }
+
+      .page-info {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .page-info strong {
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .page-info span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .canvas-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .viewport {
+        position: relative;
+        display: grid;
+        height: calc(1152px - 72px - 64px - 70px);
+        min-height: 0;
+        place-items: center;
+        overflow: hidden;
+        padding: 34px 0;
+      }
+
+      .ghost-card {
+        position: absolute;
+        top: 92px;
+        right: 112px;
+        width: 362px;
+        height: 640px;
+        border: 1px solid #ebebeb;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.06);
+        opacity: 0.62;
+        transform: translateX(38px) scale(0.96);
+      }
+
+      .ghost-card::before {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background:
+          linear-gradient(#efefef 1px, transparent 1px),
+          linear-gradient(90deg, #efefef 1px, transparent 1px);
+        background-size: 28px 28px;
+        content: "";
+      }
+
+      .ghost-content {
+        position: relative;
+        padding: 48px 36px;
+        color: rgba(30, 30, 30, 0.42);
+        font-family: var(--serif);
+        font-size: 18px;
+        line-height: 1.75;
+      }
+
+      .poster {
+        position: relative;
+        width: 430px;
+        height: 764px;
+        overflow: hidden;
+        border: 1px solid #111;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+          0 28px 70px rgba(0, 0, 0, 0.16);
+      }
+
+      .poster::before {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(#eeeeee 1px, transparent 1px),
+          linear-gradient(90deg, #eeeeee 1px, transparent 1px);
+        background-size: 28px 28px;
+        content: "";
+        opacity: 0.72;
+      }
+
+      .poster-top {
+        position: absolute;
+        top: 22px;
+        left: 28px;
+        right: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #8a8a8a;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0;
+      }
+
+      .poster-body {
+        position: relative;
+        padding: 78px 50px 52px;
+        color: #242424;
+        font-family: var(--serif);
+        font-size: 19px;
+        line-height: 1.72;
+      }
+
+      .poster-body p {
+        margin: 0 0 20px;
+      }
+
+      .poster-body h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0 12px;
+        color: #1a1a1a;
+        font-family: var(--sans);
+        font-size: 20px;
+        line-height: 1.32;
+      }
+
+      .poster-body h2::before {
+        display: block;
+        width: 4px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--blue);
+        content: "";
+      }
+
+      .poster-body h3 {
+        margin: 16px 0 8px;
+        font-family: var(--sans);
+        font-size: 16px;
+      }
+
+      .selection-frame {
+        position: absolute;
+        inset: -1px;
+        border: 1px solid var(--blue);
+        border-radius: 10px;
+        pointer-events: none;
+      }
+
+      .selection-frame::before,
+      .selection-frame::after {
+        position: absolute;
+        display: grid;
+        height: 24px;
+        place-items: center;
+        border: 1px solid var(--blue);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--blue);
+        font-family: var(--mono);
+        font-size: 11px;
+        content: attr(data-label);
+      }
+
+      .selection-frame::before {
+        top: 0;
+        left: 18px;
+        width: 66px;
+      }
+
+      .selection-frame::after {
+        right: 18px;
+        bottom: 0;
+        width: 82px;
+        content: "430 x 764";
+      }
+
+      .filmstrip {
+        display: flex;
+        height: 70px;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.84);
+        padding: 0 20px;
+      }
+
+      .thumb {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: #666;
+        font-size: 13px;
+        font-weight: 520;
+      }
+
+      .thumb.active {
+        border-color: #000;
+        box-shadow: 0 0 0 1px #000 inset;
+        color: #000;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f5f5f5;
+        padding: 4px;
+      }
+
+      .tab {
+        display: grid;
+        height: 36px;
+        place-items: center;
+        border-radius: 6px;
+        color: #666;
+        font-size: 13px;
+        font-weight: 560;
+      }
+
+      .tab.active {
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        color: #000;
+      }
+
+      .inspector-scroll {
+        height: calc(1152px - 72px - 66px);
+        overflow: hidden;
+        padding: 8px 18px 20px;
+      }
+
+      .section {
+        border-bottom: 1px solid var(--line);
+        padding: 16px 0;
+      }
+
+      .section:last-child {
+        border-bottom: 0;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 13px;
+      }
+
+      .section h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      .section p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .template-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .template {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 12px;
+        align-items: center;
+        min-height: 64px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 10px;
+      }
+
+      .template.active {
+        border-color: #000;
+        box-shadow: 0 0 0 1px #000 inset;
+      }
+
+      .swatch {
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .swatch.dark {
+        background: #101010;
+      }
+
+      .swatch.paper {
+        background:
+          radial-gradient(#e8dccd 1px, transparent 1px), #fbf8f1;
+        background-size: 12px 12px;
+      }
+
+      .swatch.blue {
+        border-left: 5px solid var(--blue);
+        background: #fbfdff;
+      }
+
+      .template strong {
+        display: block;
+        font-size: 13px;
+        font-weight: 640;
+      }
+
+      .template span {
+        display: block;
+        overflow: hidden;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .control-grid {
+        display: grid;
+        gap: 11px;
+      }
+
+      .segmented {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f5f5f5;
+        padding: 4px;
+      }
+
+      .segment {
+        display: grid;
+        height: 34px;
+        place-items: center;
+        border-radius: 6px;
+        color: #666;
+        font-size: 12px;
+        font-weight: 560;
+      }
+
+      .segment.active {
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        color: #000;
+      }
+
+      .color-row {
+        display: flex;
+        gap: 9px;
+      }
+
+      .color {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: var(--color);
+        box-shadow: 0 0 0 4px #fff inset;
+      }
+
+      .color.active {
+        outline: 2px solid #000;
+        outline-offset: 3px;
+      }
+
+      .select {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0 11px;
+        background: #fff;
+        font-size: 13px;
+        font-weight: 520;
+      }
+
+      .select svg {
+        width: 15px;
+        height: 15px;
+        color: #777;
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .toggle-copy {
+        display: grid;
+        gap: 2px;
+      }
+
+      .toggle-copy strong {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .toggle-copy span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .switch {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        border-radius: 999px;
+        background: #000;
+      }
+
+      .switch::after {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        content: "";
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .metric {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 10px;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 5px;
+        font-family: var(--mono);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .prompt-chip {
+        display: inline-flex;
+        height: 24px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 8px;
+        background: #fff;
+        color: #444;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="mockup">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3z"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M18.4 15.2l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <div class="title-row">
+              <strong>Platport</strong>
+              <span class="status-pill">Preview synced</span>
+            </div>
+            <div class="meta">
+              <span>14 cards</span>
+              <span class="dot"></span>
+              <span>3:4 ratio</span>
+              <span class="dot"></span>
+              <span>Updated 14:01</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button class="btn icon" aria-label="Command menu">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M8 8h.01M16 8h.01M8 16h.01M16 16h.01"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+          <button class="btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M14 3v4a2 2 0 0 0 2 2h4"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="M6 21h12a2 2 0 0 0 2-2V8l-5-5H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path d="M8 15h8M8 18h5" stroke="currentColor" stroke-width="1.8" />
+            </svg>
+            Markdown
+          </button>
+          <button class="btn primary">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 3v10m0 0l4-4m-4 4L8 9"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M5 15v4h14v-4"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+            Export cards
+          </button>
+        </div>
+      </header>
+
+      <section class="workbench">
+        <aside class="platform-rail" aria-label="平台导航">
+          <div class="rail-header">
+            <div class="rail-brand">
+              <div class="rail-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <div class="rail-title">
+                <strong>Workspace</strong>
+                <span>Multi-platform editor</span>
+              </div>
+            </div>
+            <button class="rail-toggle" type="button" aria-label="折叠侧边栏" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M15 18l-6-6 6-6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <nav class="platform-list">
+            <button class="platform-item active" type="button" aria-label="小红书图文">
+              <span class="platform-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="4" y="5" width="16" height="14" rx="3" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="platform-text">
+                <strong>小红书</strong>
+                <span>图文卡片、封面和话题</span>
+              </span>
+              <span class="platform-badge">14</span>
+            </button>
+
+            <button class="platform-item" type="button" aria-label="公众号长文">
+              <span class="platform-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M6 4h12v16H6z" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="platform-text">
+                <strong>公众号</strong>
+                <span>长文标题、摘要和排版</span>
+              </span>
+              <span class="platform-badge">Draft</span>
+            </button>
+
+            <button class="platform-item" type="button" aria-label="X 线程">
+              <span class="platform-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="platform-text">
+                <strong>X / Twitter</strong>
+                <span>线程拆分和短句预览</span>
+              </span>
+              <span class="platform-badge">280</span>
+            </button>
+
+            <button class="platform-item" type="button" aria-label="LinkedIn 动态">
+              <span class="platform-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <rect x="4" y="7" width="16" height="13" rx="2" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M9 7V5h6v2M8 11v5M12 11v5M16 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="platform-text">
+                <strong>LinkedIn</strong>
+                <span>专业观点和行动号召</span>
+              </span>
+              <span class="platform-badge">B2B</span>
+            </button>
+          </nav>
+
+          <div class="rail-footer">
+            <strong>Shared draft</strong>
+            <span>所有平台共用同一篇源文，再进入各平台做二次编辑。</span>
+          </div>
+        </aside>
+
+        <aside class="sidebar">
+          <div class="panel-header">
+            <div class="panel-title">
+              <strong>Draft</strong>
+              <span>5808 字 · 9 分钟</span>
+            </div>
+            <span class="kicker">Writing</span>
+          </div>
+
+          <div class="editor-body">
+            <div>
+              <div class="field">
+                <div class="label">
+                  <span>Title</span>
+                  <span>68</span>
+                </div>
+                <div class="input">苹果 WWDC 2026 个人解读：Siri AI、Gemini 与端侧模型</div>
+              </div>
+            </div>
+
+            <div class="textarea-shell">
+              <div class="textarea-tools">
+                <div class="mini-tools">
+                  <div class="tool-icon active" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M6 4h8a4 4 0 0 1 0 8H6z" stroke="currentColor" stroke-width="1.8" />
+                      <path d="M6 12h9a4 4 0 0 1 0 8H6z" stroke="currentColor" stroke-width="1.8" />
+                    </svg>
+                  </div>
+                  <div class="tool-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M10 4h8M6 20h8M14 4L10 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </div>
+                  <div class="tool-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12h14M5 7h14M5 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </div>
+                </div>
+                <span class="prompt-chip">Markdown</span>
+              </div>
+              <div class="draft-text">WWDC 2026 于 2026 年 6 月 8 日在 Apple Park 举行，主题演讲约 90 分钟，仅发布软件更新，无新硬件。这是 Tim Cook 最后一次以 CEO 身份主持 WWDC。
+
+Craig Federighi 将今年的主题概括为 <b>"sweating the details"</b>。但细节之下，这场发布会的信息密度并不低：Siri 自 2011 年以来最彻底的重构、Apple 与 Google Gemini 的公开合作、端侧模型的分层架构、亲子控制的历史性升级。
+
+本文按发布内容、底层架构、竞争格局和战略判断四个层次展开，试图提供一个比功能清单更完整的阅读视角。
+
+## Siri AI：2011 年以来最彻底的重构
+
+Siri AI 是 WWDC 2026 最重要的发布。Apple 宣布了 Siri 自诞生以来最根本的重新构建，核心变化不在于它说话更自然，而在于它的角色从“语音命令入口”变成了覆盖全平台的对话式操作系统接口。</div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="canvas">
+          <div class="canvas-header">
+            <div class="page-info">
+              <strong>2/14</strong>
+              <span>备忘录 · 系统蓝</span>
+            </div>
+            <div class="canvas-actions">
+              <button class="btn icon" aria-label="Previous">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button class="btn icon" aria-label="Next">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="viewport">
+            <div class="ghost-card">
+              <div class="ghost-content">
+                <p><b>Apple Foundation Models</b>：新一代 Apple 智能与 Gemini 合作构建。</p>
+                <p>端侧处理 + Private Cloud Compute，个人数据不离开设备或仅用于加密推理。</p>
+                <p><b>更强的端侧模型：</b>在 Apple Silicon 设备上运行的本地模型。</p>
+              </div>
+            </div>
+            <div class="poster">
+              <div class="selection-frame" data-label="Page 02"></div>
+              <div class="poster-top">
+                <span>02</span>
+                <span>03</span>
+              </div>
+              <div class="poster-body">
+                <p>WWDC 2026 于 2026 年 6 月 8 日在 Apple Park 举行，主题演讲约 90 分钟，仅发布软件更新，无新硬件。这是 Tim Cook 最后一次以 CEO 身份主持 WWDC。</p>
+                <p>Craig Federighi 将今年的主题概括为 “sweating the details”。但细节之下，这场发布会的信息密度并不低：Siri 自 2011 年以来最彻底的重构、Apple 与 Google Gemini 的公开合作、端侧模型的分层架构。</p>
+                <p>本文按发布内容、底层架构、竞争格局和战略判断四个层次展开，试图提供一个比功能清单更完整的阅读视角。</p>
+                <h2>Siri AI：2011 年以来最彻底的重构</h2>
+                <p>Siri AI 是 WWDC 2026 最重要的发布。Apple 宣布了 Siri 自诞生以来最根本的重新构建，核心变化不在于它说话更自然，而在于它的角色从“语音命令入口”变成了覆盖全平台的对话式操作系统接口。</p>
+                <h3>底层架构</h3>
+                <p>Apple 采用了三层模型架构来支撑 Siri AI。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="filmstrip">
+            <div class="thumb">1</div>
+            <div class="thumb active">2</div>
+            <div class="thumb">3</div>
+            <div class="thumb">4</div>
+            <div class="thumb">5</div>
+            <div class="thumb">6</div>
+            <div class="thumb">7</div>
+            <div class="thumb">8</div>
+            <div class="thumb">9</div>
+            <div class="thumb">10</div>
+            <div class="thumb">11</div>
+            <div class="thumb">12</div>
+            <div class="thumb">13</div>
+            <div class="thumb">14</div>
+          </div>
+        </section>
+
+        <aside class="inspector">
+          <div class="tabs">
+            <div class="tab active">Style</div>
+            <div class="tab">Cover</div>
+            <div class="tab">Export</div>
+          </div>
+          <div class="inspector-scroll">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h2>Template</h2>
+                  <p>只保留影响卡片质量的设置</p>
+                </div>
+                <span class="kicker">4 presets</span>
+              </div>
+              <div class="template-list">
+                <div class="template">
+                  <div class="swatch dark"></div>
+                  <div>
+                    <strong>暗黑阅读</strong>
+                    <span>高对比标题和长文沉浸阅读</span>
+                  </div>
+                </div>
+                <div class="template">
+                  <div class="swatch paper"></div>
+                  <div>
+                    <strong>古典纸纹</strong>
+                    <span>知识长文、读书笔记和复盘</span>
+                  </div>
+                </div>
+                <div class="template active">
+                  <div class="swatch"></div>
+                  <div>
+                    <strong>备忘录</strong>
+                    <span>顶部工具栏和清爽系统感</span>
+                  </div>
+                </div>
+                <div class="template">
+                  <div class="swatch blue"></div>
+                  <div>
+                    <strong>蓝色标注</strong>
+                    <span>观点拆解和教程型内容</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h2>Appearance</h2>
+                  <p>比例、字体和主题色</p>
+                </div>
+              </div>
+              <div class="control-grid">
+                <div class="color-row">
+                  <div class="color active" style="--color: #0070f3"></div>
+                  <div class="color" style="--color: #8e8e93"></div>
+                  <div class="color" style="--color: #30d158"></div>
+                  <div class="color" style="--color: #f5a524"></div>
+                </div>
+                <div class="segmented">
+                  <div class="segment">1:1</div>
+                  <div class="segment active">3:4</div>
+                  <div class="segment">9:16</div>
+                </div>
+                <div class="select">
+                  <span>宋体 / Serif</span>
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+            </section>
+
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h2>Layout</h2>
+                  <p>发布前预览与导出尺寸</p>
+                </div>
+              </div>
+              <div class="control-grid">
+                <div class="toggle-row">
+                  <div class="toggle-copy">
+                    <strong>发布预览</strong>
+                    <span>显示手机端安全边界</span>
+                  </div>
+                  <div class="switch"></div>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric">
+                    <span>Export size</span>
+                    <strong>1290x1720</strong>
+                  </div>
+                  <div class="metric">
+                    <span>Pages</span>
+                    <strong>14</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </section>
+    </main>
+    <script>
+      const mockup = document.querySelector(".mockup");
+      const railToggle = document.querySelector(".rail-toggle");
+
+      railToggle?.addEventListener("click", () => {
+        const collapsed = mockup?.dataset.sidebar === "collapsed";
+        mockup?.setAttribute("data-sidebar", collapsed ? "expanded" : "collapsed");
+        railToggle.setAttribute("aria-pressed", String(!collapsed));
+        railToggle.setAttribute("aria-label", collapsed ? "折叠侧边栏" : "展开侧边栏");
+      });
+    </script>
+  </body>
+</html>
