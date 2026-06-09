@@ -9,34 +9,61 @@ import type {
   TypefaceId,
 } from '../types/editor';
 
-const INITIAL_TITLE = '苹果 WWDC 2026 个人解读：Siri AI、Gemini 合作与 Apple 的 AI 路线图';
+const INITIAL_TITLE = 'Markdown 卡片语法示范：从标题到表格的一次完整预览';
 
-const INITIAL_BODY = `WWDC 2026 于 2026 年 6 月 8 日在 Apple Park 举行，主题演讲约 90 分钟，仅发布软件更新，无新硬件。
+const INITIAL_BODY = `这是一份用于测试卡片排版的 Markdown 示例。它覆盖了常见写作语法，方便你快速检查不同模板、配色、字体和比例下的显示效果。
 
-本文按发布内容、底层架构、竞争格局和战略判断四个层次展开，试图提供一个比功能清单更完整的阅读视角。
+## 二级标题：段落与强调
 
-## Siri AI：2011 年以来最彻底的重构
+普通段落用于观察正文行高、段间距和换行表现。你可以使用 **加粗文本** 强调重点，也可以使用 *斜体文本* 表示语气变化，还可以使用 ~~删除线~~ 标记被替换的想法。
 
-Siri AI 是 WWDC 2026 最重要的发布。Apple 宣布了 Siri 自诞生以来最根本的重新构建，核心变化不在于它说话更自然，而在于它的角色从语音命令入口变成了覆盖全平台的对话式操作系统接口。
+这里还有一个 [示例链接](https://example.com)，用于检查链接颜色和下划线样式。
 
-底层架构上，Apple 采用三层模型架构来支撑 Siri AI：
+### 三级标题：无序列表
 
-- Apple Foundation Models：新一代 Apple 智能，与 Google Gemini 合作构建。
-- 隐私架构：端侧处理 + Private Cloud Compute，个人数据不离开设备或仅用于加密推理。
-- 更强的端侧模型：在 Apple Silicon 设备上运行第二层更强大的本地模型。
+- 第一条要点，用来检查圆点是否显示。
+- 第二条要点，用来检查多行文本在列表里的缩进是否稳定。
+- 第三条要点，可以继续承载更长的解释。
 
-## 核心能力
+### 有序列表
 
-能力描述自然多轮对话，支持打字和语音输入，连续追问和澄清个人上下文，理解邮件、短信、照片、日历、备忘录，提供个性化答案。
+1. 先写下核心结论。
+2. 再补充关键证据。
+3. 最后给出行动建议。
 
-## 我的判断
+### 任务列表
 
-这场发布会的信息密度并不低。Apple 的 AI 路线不是追求聊天机器人本身，而是把 AI 重新嵌进系统级操作入口。真正值得观察的是：Siri 能不能成为下一代 iOS 的操作层。`;
+- [x] 支持已完成事项。
+- [ ] 支持待完成事项。
 
-const INITIAL_TAGS = '#WWDC2026 #AppleIntelligence #SiriAI #Gemini #科技观察';
+> 引用块用于放置观点、摘录或提醒。它应该和正文有清晰区分，但不能抢走正文的阅读节奏。
+
+行内代码示例：使用 \`const card = render(markdown)\` 生成卡片。
+
+\`\`\`ts
+type CardStatus = 'draft' | 'ready' | 'exported';
+
+function formatStatus(status: CardStatus) {
+  return status.toUpperCase();
+}
+\`\`\`
+
+| 语法 | 用途 | 状态 |
+| --- | --- | --- |
+| 标题 | 建立层级 | 支持 |
+| 列表 | 梳理结构 | 支持 |
+| 表格 | 对比信息 | 支持 |
+
+![示例图片](https://placehold.co/720x360/png?text=Platport)
+
+---
+
+最后一段用于检查分割线后的收尾文本。`;
+
+const INITIAL_TAGS = '#Markdown #卡片设计 #排版测试 #Platport';
 
 const INITIAL_SUMMARY =
-  'WWDC 2026 推出 Siri AI 重构、Gemini 合作和新的端侧模型策略，Apple 正在把 AI 重新嵌入系统级操作入口。';
+  '这是一份覆盖常见 Markdown 语法的卡片示范文案，用于检查标题、列表、引用、代码、表格和图片在不同模板里的显示效果。';
 
 export const buildMarkdown = (title: string, body: string) =>
   `# ${title.trim() || '未命名笔记'}\n\n${body.trim()}\n`;
@@ -97,8 +124,8 @@ export const useEditorStore = create<EditorState>()(
       posterPaletteId: 'obsidian',
       previewMode: 'poster',
       layoutMode: 'split',
-      posterRatio: '4:5',
-      typeface: 'system',
+      posterRatio: '3:4',
+      typeface: 'serif',
       imageRadius: 12,
       showChrome: true,
       past: [],
@@ -158,7 +185,7 @@ export const useEditorStore = create<EditorState>()(
     }),
     {
       name: 'platport-editor',
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const state = persisted as Partial<EditorState>;
         return {
@@ -172,8 +199,8 @@ export const useEditorStore = create<EditorState>()(
           posterPaletteId: state.posterPaletteId || 'obsidian',
           previewMode: 'poster' as PreviewMode,
           layoutMode: state.layoutMode || 'split',
-          posterRatio: state.posterRatio || '4:5',
-          typeface: state.typeface || 'system',
+          posterRatio: '3:4' as PosterRatio,
+          typeface: 'serif' as TypefaceId,
           imageRadius: state.imageRadius ?? 12,
           showChrome: state.showChrome ?? true,
           markdown: buildMarkdown(state.noteTitle || INITIAL_TITLE, state.noteBody || INITIAL_BODY),

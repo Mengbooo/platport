@@ -130,8 +130,7 @@ button:disabled {
 }
 
 .field-block input,
-.field-block textarea,
-.select-field select {
+.field-block textarea {
   width: 100%;
   border: 1px solid var(--input);
   border-radius: var(--radius-sm);
@@ -151,8 +150,10 @@ button:disabled {
 }
 
 .summary-field textarea {
+  display: block;
   height: 88px;
   min-height: 88px;
+  overflow: auto;
   padding: 12px;
   resize: none;
   font: 13px/1.72 "Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", Arial, sans-serif;
@@ -161,6 +162,8 @@ button:disabled {
 
 .body-field {
   display: flex;
+  flex: 0 0 auto;
+  height: 260px;
   min-height: 220px;
   flex-direction: column;
   gap: 5px;
@@ -168,8 +171,10 @@ button:disabled {
 
 .body-field textarea {
   flex: 1;
-  height: 220px;
-  min-height: 220px;
+  display: block;
+  height: auto;
+  min-height: 0;
+  overflow: auto;
   resize: none;
   padding: 12px;
   background: var(--background);
@@ -179,7 +184,7 @@ button:disabled {
 
 .field-block input:focus,
 .field-block textarea:focus,
-.select-field select:focus {
+.select-trigger:focus {
   border-color: var(--ring);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 22%, transparent);
 }
@@ -302,35 +307,17 @@ button:disabled {
   color: var(--primary-foreground);
 }
 
-.settings-stack {
-  display: grid;
-  gap: 11px;
+.settings-field {
+  margin-top: 0;
 }
 
-.embedded-settings {
-  margin-top: 2px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+.template-field {
+  margin-top: 6px;
 }
 
-.settings-section {
+.field-control {
   display: grid;
   gap: 8px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.settings-section:last-of-type {
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-.section-label {
-  color: var(--muted-foreground);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .compact-fields {
@@ -470,24 +457,36 @@ button:disabled {
   color: var(--muted-foreground);
 }
 
-.select-field select {
-  height: 36px;
-  padding: 0 10px;
+.select-trigger {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+  background: var(--background);
+}
+
+.select-content {
+  width: var(--radix-select-trigger-width);
+  min-width: var(--radix-select-trigger-width);
 }
 
 .cover-uploader {
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr) auto;
   gap: 10px;
+  width: 100%;
   padding: 9px;
   border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
   background: var(--background);
+  color: inherit;
   cursor: pointer;
+  text-align: left;
 }
 
-.cover-uploader input {
-  position: absolute;
+.cover-input {
+  position: fixed;
+  top: -100px;
+  left: -100px;
   width: 1px;
   height: 1px;
   opacity: 0;
@@ -540,13 +539,17 @@ button:disabled {
   gap: 8px;
 }
 
-.caption-copy-card {
+.caption-copy-field {
   display: grid;
-  gap: 8px;
-  padding: 10px;
+  gap: 5px;
+}
+
+.caption-copy-box {
+  min-height: 34px;
+  padding: 9px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  background: var(--muted);
+  background: var(--background);
 }
 
 .caption-copy-header {
@@ -559,13 +562,13 @@ button:disabled {
 .caption-copy-header span {
   color: var(--muted-foreground);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-.caption-copy-card p {
+.caption-copy-box p {
   margin: 0;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.72;
 }
 
 .caption-tag-list {
@@ -727,8 +730,22 @@ button:disabled {
   padding-left: 1.22em;
 }
 
+.poster-card #chicpage ul {
+  list-style: disc;
+}
+
+.poster-card #chicpage ol {
+  list-style: decimal;
+}
+
 .poster-card #chicpage li {
+  display: list-item;
   padding-left: 0.08em;
+}
+
+.poster-card #chicpage li::marker {
+  color: var(--poster-accent);
+  font-weight: 760;
 }
 
 .poster-card #chicpage blockquote {

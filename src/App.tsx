@@ -4,6 +4,13 @@ import type { CSSProperties } from 'react';
 import './App.css';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './components/ui/select';
 import { usePosterPages } from './hooks/usePosterPages';
 import { exportPosterImages } from './lib/export';
 import { getStats, markdownToHtml } from './lib/markdown';
@@ -83,6 +90,8 @@ function App() {
   const [status, setStatus] = useState('Ready');
   const [savedAt, setSavedAt] = useState(formatClock);
   const posterRefs = useRef<Array<HTMLElement | null>>([]);
+  const posterScrollRef = useRef<HTMLDivElement | null>(null);
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
 
   const articleTheme = getTheme(themeId);
   const posterTheme = getPosterTheme(posterThemeId);
@@ -151,9 +160,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    posterRefs.current[activeIndex]?.scrollIntoView({
-      block: 'nearest',
-      inline: 'center',
+    const scroller = posterScrollRef.current;
+    const target = posterRefs.current[activeIndex]?.parentElement;
+    if (!scroller || !target) return;
+
+    scroller.scrollTo({
+      left: target.offsetLeft - (scroller.clientWidth - target.clientWidth) / 2,
       behavior: 'smooth',
     });
   }, [activeIndex, posterPages.length]);
@@ -337,9 +349,9 @@ function App() {
               />
             </label>
 
-            <div className="settings-stack embedded-settings">
-              <section className="settings-section">
-                <span className="section-label">模板</span>
+            <label className="field-block settings-field template-field">
+              <span>模板</span>
+              <div className="field-control">
                 <div className="theme-list">
                   {POSTER_THEMES.map((theme) => (
                     <button
@@ -357,10 +369,12 @@ function App() {
                     </button>
                   ))}
                 </div>
-              </section>
+              </div>
+            </label>
 
-              <section className="settings-section">
-                <span className="section-label">配色</span>
+            <label className="field-block settings-field palette-field">
+              <span>配色</span>
+              <div className="field-control">
                 <div className="palette-list">
                   {availablePalettes.map((item) => (
                     <button
@@ -383,54 +397,69 @@ function App() {
                     </button>
                   ))}
                 </div>
-              </section>
+              </div>
+            </label>
 
-              <section className="settings-section compact-fields">
-                <span className="section-label">控制</span>
-                <label className="select-field">
+            <label className="field-block settings-field controls-field">
+              <span>控制</span>
+              <div className="field-control compact-fields">
+                <div className="select-field">
                   <LayoutGrid size={15} />
-                  <select
+                  <Select
                     value={posterRatio}
-                    onChange={(event) => {
-                      setPosterRatio(event.target.value as PosterRatio);
+                    onValueChange={(value) => {
+                      setPosterRatio(value as PosterRatio);
                       setStatus('Ratio updated');
                     }}
-                    aria-label="贴图比例"
                   >
-                    {Object.entries(POSTER_RATIOS).map(([id, item]) => (
-                      <option key={id} value={id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="select-field">
+                    <SelectTrigger className="select-trigger" aria-label="贴图比例">
+                      <SelectValue placeholder="贴图比例" />
+                    </SelectTrigger>
+                    <SelectContent className="select-content" position="popper">
+                      {Object.entries(POSTER_RATIOS).map(([id, item]) => (
+                        <SelectItem key={id} value={id}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="select-field">
                   <Type size={15} />
-                  <select
+                  <Select
                     value={typeface}
-                    onChange={(event) => {
-                      setTypeface(event.target.value as TypefaceId);
+                    onValueChange={(value) => {
+                      setTypeface(value as TypefaceId);
                       setStatus('字体已更新');
                     }}
-                    aria-label="卡片字体"
                   >
-                    {Object.entries(TYPEFACES).map(([id, item]) => (
-                      <option key={id} value={id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </section>
+                    <SelectTrigger className="select-trigger" aria-label="卡片字体">
+                      <SelectValue placeholder="卡片字体" />
+                    </SelectTrigger>
+                    <SelectContent className="select-content" position="popper">
+                      {Object.entries(TYPEFACES).map(([id, item]) => (
+                        <SelectItem key={id} value={id}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </label>
 
-              <section className="settings-section">
-                <span className="section-label">封面</span>
-                <label className="cover-uploader">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleCoverUpload(event.target.files?.[0])}
-                  />
+            <label className="field-block settings-field cover-field">
+              <span>封面</span>
+              <div className="field-control">
+                <button
+                  type="button"
+                  className="cover-uploader"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    coverInputRef.current?.click();
+                  }}
+                >
                   <div className="cover-thumb" data-empty={!coverImage}>
                     {hasCoverImage ? <img src={coverImage} alt="" /> : <span>无图</span>}
                   </div>
@@ -439,12 +468,13 @@ function App() {
                     <span>截图、产品图或海报背景</span>
                   </div>
                   <Upload size={18} />
-                </label>
+                </button>
                 {coverImage ? (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
+                    onClick={(event) => {
+                      event.preventDefault();
                       setCoverImage('');
                       setStatus('Default cover restored');
                     }}
@@ -453,55 +483,68 @@ function App() {
                     移除
                   </Button>
                 ) : null}
-              </section>
+              </div>
+            </label>
+            <input
+              ref={coverInputRef}
+              className="cover-input"
+              type="file"
+              accept="image/*"
+              onChange={(event) => handleCoverUpload(event.target.files?.[0])}
+            />
 
-              <section className="settings-section">
-                <span className="section-label">文案</span>
+            <label className="field-block settings-field caption-field">
+              <span>文案</span>
+              <div className="field-control">
                 <div className="caption-copy-section">
-                  <div className="caption-copy-card">
+                  <div className="caption-copy-field">
                     <div className="caption-copy-header">
                       <span>标题文案</span>
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="复制标题文案"
                         onClick={() => copyText(captionTitle, '标题已复制')}
                       >
                         <Copy size={14} />
-                        复制
                       </Button>
                     </div>
-                    <p>{captionTitle}</p>
+                    <div className="caption-copy-box">
+                      <p>{captionTitle}</p>
+                    </div>
                   </div>
 
-                  <div className="caption-copy-card">
+                  <div className="caption-copy-field">
                     <div className="caption-copy-header">
-                      <span>摘要和标签</span>
+                      <span>笔记文案</span>
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copyText(captionBody, '摘要和标签已复制')}
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label="复制笔记文案"
+                        onClick={() => copyText(captionBody, '笔记文案已复制')}
                       >
                         <Copy size={14} />
-                        复制
                       </Button>
                     </div>
-                    {coverSummary ? <p>{coverSummary}</p> : null}
-                    <div className="caption-tag-list">
-                      {tags.slice(0, 8).map((tag) => (
-                        <span key={tag}>{tag}</span>
-                      ))}
+                    <div className="caption-copy-box">
+                      {coverSummary ? <p>{coverSummary}</p> : null}
+                      <div className="caption-tag-list">
+                        {tags.slice(0, 8).map((tag) => (
+                          <span key={tag}>{tag}</span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </section>
+              </div>
+            </label>
 
-              <Button className="export-button" onClick={handleExportPosters}>
-                <ImageDown size={15} />
-                导出卡片
-              </Button>
-            </div>
+            <Button className="export-button" onClick={handleExportPosters}>
+              <ImageDown size={15} />
+              导出卡片
+            </Button>
           </CardContent>
         </Card>
 
@@ -514,7 +557,7 @@ function App() {
           </div>
 
           <div className="poster-stage">
-            <div className="poster-scroll">
+            <div className="poster-scroll" ref={posterScrollRef}>
               {posterPages.map((page, index) => (
                 <div key={`poster-shell-${index}`} className="poster-shell">
                   <span>{String(index + 1).padStart(2, '0')}</span>
