@@ -188,11 +188,9 @@ const fontStacks = {
   sans:
     '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
   serif:
-    '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
-  mono:
-    '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
-  kai:
-    '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif',
+    '"Noto Serif SC", "Songti SC", "STSong", "SimSun", "Times New Roman", serif',
+  mono: '"SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace',
+  kai: '"Kaiti SC", "STKaiti", "KaiTi", "楷体", cursive',
 };
 
 const createTheme = (

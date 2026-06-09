@@ -1,4 +1,4 @@
-import { ImageDown, LayoutGrid, Sparkles, Upload, X } from 'lucide-react';
+import { Copy, ImageDown, LayoutGrid, Sparkles, Type, Upload, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './App.css';
@@ -11,13 +11,14 @@ import {
   POSTER_PALETTES,
   POSTER_RATIOS,
   POSTER_THEMES,
+  TYPEFACES,
   getDefaultPaletteId,
   getPosterPalette,
   getPosterTheme,
   getTheme,
 } from './lib/themes';
 import { buildMarkdown, useEditorStore } from './store/useEditorStore';
-import type { PosterRatio, PosterThemeId } from './types/editor';
+import type { PosterRatio, PosterThemeId, TypefaceId } from './types/editor';
 
 const GOOGLE_SANS_STACK =
   '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif';
@@ -65,6 +66,7 @@ function App() {
     posterThemeId,
     posterPaletteId,
     posterRatio,
+    typeface,
     setNoteTitle,
     setNoteSummary,
     setNoteBody,
@@ -73,6 +75,7 @@ function App() {
     setPosterThemeId,
     setPosterPaletteId,
     setPosterRatio,
+    setTypeface,
   } = useEditorStore();
 
   const [html, setHtml] = useState('');
@@ -94,10 +97,10 @@ function App() {
       ? viewportSize.width - 68
       : viewportSize.width <= 1180
         ? viewportSize.width - 420
-        : viewportSize.width - 760;
+        : viewportSize.width - 520;
   const previewMaxHeight = viewportSize.height - 150;
   const preferredPreviewWidth = posterRatio === '9:16' ? 430 : 520;
-  const previewWidth = Math.max(
+  const basePreviewWidth = Math.max(
     320,
     Math.min(
       preferredPreviewWidth,
@@ -105,9 +108,10 @@ function App() {
       Math.floor((previewMaxHeight * ratio.width) / ratio.height),
     ),
   );
+  const previewWidth = Math.max(220, Math.round(basePreviewWidth * 0.68));
   const previewScale = previewWidth / ratio.width;
   const previewHeight = Math.round(ratio.height * previewScale);
-  const typefaceValue = GOOGLE_SANS_STACK;
+  const typefaceValue = TYPEFACES[typeface]?.value ?? GOOGLE_SANS_STACK;
   const markdown = useMemo(() => buildMarkdown(noteTitle, noteBody), [noteTitle, noteBody]);
   const stats = useMemo(() => getStats(markdown), [markdown]);
   const coverSummary = noteSummary.trim();
@@ -120,6 +124,8 @@ function App() {
     .split(/\s+/)
     .map((tag) => tag.trim())
     .filter(Boolean);
+  const captionTitle = noteTitle.trim();
+  const captionBody = [coverSummary, tags.join('\n')].filter(Boolean).join('\n\n');
 
   useEffect(() => {
     let cancelled = false;
@@ -190,6 +196,13 @@ function App() {
     } catch {
       setStatus('导出失败，请稍后再试');
     }
+  };
+
+  const copyText = async (text: string, nextStatus: string) => {
+    const value = text.trim();
+    if (!value) return;
+    await navigator.clipboard.writeText(value);
+    setStatus(nextStatus);
   };
 
   const previewStyle = {
@@ -269,14 +282,14 @@ function App() {
       </header>
 
       <section className="studio-grid">
-        <Card className="editor-panel">
+        <Card className="editor-panel" size="sm">
           <CardHeader>
-            <CardTitle>Draft</CardTitle>
+            <CardTitle>草稿 / 控制台</CardTitle>
             <CardDescription>{stats.characters} 字 · {stats.readingMinutes} 分钟</CardDescription>
           </CardHeader>
           <CardContent className="editor-content">
             <label className="field-block title-field">
-              <span>Title</span>
+              <span>标题</span>
               <input
                 value={noteTitle}
                 maxLength={90}
@@ -288,7 +301,7 @@ function App() {
             </label>
 
             <label className="field-block summary-field">
-              <span>Summary</span>
+              <span>摘要</span>
               <textarea
                 value={noteSummary}
                 maxLength={180}
@@ -300,8 +313,20 @@ function App() {
               />
             </label>
 
+            <label className="field-block tags-field">
+              <span>标签</span>
+              <input
+                value={hashtags}
+                onChange={(event) => {
+                  setHashtags(event.target.value);
+                  markSaved();
+                }}
+                placeholder="#小红书 #AI"
+              />
+            </label>
+
             <label className="field-block body-field">
-              <span>Markdown</span>
+              <span>Markdown 正文</span>
               <textarea
                 value={noteBody}
                 onChange={(event) => {
@@ -311,6 +336,172 @@ function App() {
                 spellCheck={false}
               />
             </label>
+
+            <div className="settings-stack embedded-settings">
+              <section className="settings-section">
+                <span className="section-label">模板</span>
+                <div className="theme-list">
+                  {POSTER_THEMES.map((theme) => (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      className="theme-row"
+                      data-active={theme.id === posterThemeId}
+                      onClick={() => handleThemeChange(theme.id)}
+                    >
+                      <span className="theme-swatch" data-theme={theme.id} />
+                      <span>
+                        <strong>{theme.name}</strong>
+                        <small>{theme.description}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="settings-section">
+                <span className="section-label">配色</span>
+                <div className="palette-list">
+                  {availablePalettes.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="palette-card"
+                      data-active={item.id === effectivePaletteId}
+                      onClick={() => {
+                        setPosterPaletteId(item.id);
+                        setStatus(`${item.name} applied`);
+                      }}
+                      title={item.name}
+                      aria-label={`配色 ${item.name}`}
+                    >
+                      <span className="palette-swatch" style={{ background: item.preview }} />
+                      <span>
+                        <strong>{item.name}</strong>
+                        <small>{item.description}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="settings-section compact-fields">
+                <span className="section-label">控制</span>
+                <label className="select-field">
+                  <LayoutGrid size={15} />
+                  <select
+                    value={posterRatio}
+                    onChange={(event) => {
+                      setPosterRatio(event.target.value as PosterRatio);
+                      setStatus('Ratio updated');
+                    }}
+                    aria-label="贴图比例"
+                  >
+                    {Object.entries(POSTER_RATIOS).map(([id, item]) => (
+                      <option key={id} value={id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="select-field">
+                  <Type size={15} />
+                  <select
+                    value={typeface}
+                    onChange={(event) => {
+                      setTypeface(event.target.value as TypefaceId);
+                      setStatus('字体已更新');
+                    }}
+                    aria-label="卡片字体"
+                  >
+                    {Object.entries(TYPEFACES).map(([id, item]) => (
+                      <option key={id} value={id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </section>
+
+              <section className="settings-section">
+                <span className="section-label">封面</span>
+                <label className="cover-uploader">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleCoverUpload(event.target.files?.[0])}
+                  />
+                  <div className="cover-thumb" data-empty={!coverImage}>
+                    {hasCoverImage ? <img src={coverImage} alt="" /> : <span>无图</span>}
+                  </div>
+                  <div>
+                    <strong>{coverImage ? '替换封面图片' : '上传封面图片'}</strong>
+                    <span>截图、产品图或海报背景</span>
+                  </div>
+                  <Upload size={18} />
+                </label>
+                {coverImage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setCoverImage('');
+                      setStatus('Default cover restored');
+                    }}
+                  >
+                    <X size={15} />
+                    移除
+                  </Button>
+                ) : null}
+              </section>
+
+              <section className="settings-section">
+                <span className="section-label">文案</span>
+                <div className="caption-copy-section">
+                  <div className="caption-copy-card">
+                    <div className="caption-copy-header">
+                      <span>标题文案</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyText(captionTitle, '标题已复制')}
+                      >
+                        <Copy size={14} />
+                        复制
+                      </Button>
+                    </div>
+                    <p>{captionTitle}</p>
+                  </div>
+
+                  <div className="caption-copy-card">
+                    <div className="caption-copy-header">
+                      <span>摘要和标签</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyText(captionBody, '摘要和标签已复制')}
+                      >
+                        <Copy size={14} />
+                        复制
+                      </Button>
+                    </div>
+                    {coverSummary ? <p>{coverSummary}</p> : null}
+                    <div className="caption-tag-list">
+                      {tags.slice(0, 8).map((tag) => (
+                        <span key={tag}>{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <Button className="export-button" onClick={handleExportPosters}>
+                <ImageDown size={15} />
+                导出卡片
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -358,143 +549,6 @@ function App() {
           </div>
         </section>
 
-        <aside className="settings-panel">
-          <Card>
-            <CardHeader>
-              <CardTitle>Controls</CardTitle>
-              <CardDescription>样式、封面和导出集中在这里</CardDescription>
-            </CardHeader>
-            <CardContent className="settings-stack">
-              <section className="settings-section">
-                <span className="section-label">Template</span>
-                <div className="theme-list">
-                  {POSTER_THEMES.map((theme) => (
-                    <button
-                      key={theme.id}
-                      type="button"
-                      className="theme-row"
-                      data-active={theme.id === posterThemeId}
-                      onClick={() => handleThemeChange(theme.id)}
-                    >
-                      <span className="theme-swatch" data-theme={theme.id} />
-                      <span>
-                        <strong>{theme.name}</strong>
-                        <small>{theme.description}</small>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="settings-section">
-                <span className="section-label">Palette</span>
-                <div className="palette-list">
-                  {availablePalettes.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="palette-card"
-                      data-active={item.id === effectivePaletteId}
-                      onClick={() => {
-                        setPosterPaletteId(item.id);
-                        setStatus(`${item.name} applied`);
-                      }}
-                      title={item.name}
-                      aria-label={`配色 ${item.name}`}
-                    >
-                      <span className="palette-swatch" style={{ background: item.preview }} />
-                      <span>
-                        <strong>{item.name}</strong>
-                        <small>{item.description}</small>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="settings-section compact-fields">
-                <label className="select-field">
-                  <LayoutGrid size={15} />
-                  <select
-                    value={posterRatio}
-                    onChange={(event) => {
-                      setPosterRatio(event.target.value as PosterRatio);
-                      setStatus('Ratio updated');
-                    }}
-                    aria-label="贴图比例"
-                  >
-                    {Object.entries(POSTER_RATIOS).map(([id, item]) => (
-                      <option key={id} value={id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </section>
-
-              <section className="settings-section">
-                <span className="section-label">Cover</span>
-                <label className="cover-uploader">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => handleCoverUpload(event.target.files?.[0])}
-                  />
-                  <div className="cover-thumb" data-empty={!coverImage}>
-                    {hasCoverImage ? <img src={coverImage} alt="" /> : <span>无图</span>}
-                  </div>
-                  <div>
-                    <strong>{coverImage ? '替换封面图片' : '上传封面图片'}</strong>
-                    <span>截图、产品图或海报背景</span>
-                  </div>
-                  <Upload size={18} />
-                </label>
-                {coverImage ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setCoverImage('');
-                      setStatus('Default cover restored');
-                    }}
-                  >
-                    <X size={15} />
-                    Remove
-                  </Button>
-                ) : null}
-              </section>
-
-              <section className="settings-section">
-                <span className="section-label">Caption</span>
-                <label className="field-block">
-                  <span>Tags</span>
-                  <input
-                    value={hashtags}
-                    onChange={(event) => {
-                      setHashtags(event.target.value);
-                      markSaved();
-                    }}
-                    placeholder="#小红书 #AI"
-                  />
-                </label>
-                <div className="caption-preview">
-                  <strong>{noteTitle}</strong>
-                  {coverSummary ? <p>{coverSummary}</p> : null}
-                  <div>
-                    {tags.slice(0, 6).map((tag) => (
-                      <span key={tag}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              <Button className="export-button" onClick={handleExportPosters}>
-                <ImageDown size={15} />
-                Export Cards
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
       </section>
     </main>
   );
