@@ -1,4 +1,5 @@
 .app-shell {
+  --top-panel-height: 63px;
   position: fixed;
   inset: 0;
   height: 100vh;
@@ -19,21 +20,6 @@ button {
 button:disabled {
   cursor: not-allowed;
   opacity: 0.42;
-}
-
-.studio-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 64px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in oklch, var(--background) 86%, transparent);
-  backdrop-filter: blur(16px);
 }
 
 .brand,
@@ -87,9 +73,32 @@ button:disabled {
   display: grid;
   grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
   gap: 12px;
-  height: calc(100vh - 64px);
+  height: 100vh;
   min-height: 0;
   padding: 12px;
+}
+
+.sidebar-column {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.brand-card {
+  height: var(--top-panel-height);
+  min-width: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.brand-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .editor-panel,
@@ -201,7 +210,8 @@ button:disabled {
 .canvas-toolbar {
   justify-content: space-between;
   gap: 12px;
-  min-height: 50px;
+  height: calc(var(--top-panel-height) - 1px);
+  min-height: 0;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
 }
@@ -687,6 +697,7 @@ button:disabled {
   padding: 46px;
   background: transparent;
   color: var(--poster-ink);
+  font-synthesis: style;
   font-size: 24px;
   line-height: 1.62;
 }
@@ -734,6 +745,10 @@ button:disabled {
   list-style: disc;
 }
 
+.poster-card #chicpage ul.contains-task-list {
+  padding-left: 0;
+}
+
 .poster-card #chicpage ol {
   list-style: decimal;
 }
@@ -748,18 +763,100 @@ button:disabled {
   font-weight: 760;
 }
 
+.poster-card #chicpage li:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 0.48em;
+  list-style: none;
+  padding-left: 0;
+  color: var(--poster-ink);
+}
+
+.poster-card #chicpage li:has(input[type="checkbox"])::before {
+  content: none;
+}
+
+.poster-card #chicpage li:has(input[type="checkbox"]:checked)::before {
+  content: none;
+}
+
+.poster-card #chicpage li:has(input[type="checkbox"]:checked) {
+  color: var(--poster-ink);
+  text-decoration: none;
+}
+
+.poster-card #chicpage li input[type="checkbox"] {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 0.92em;
+  height: 0.92em;
+  margin: 0;
+  appearance: none;
+  place-content: center;
+  border: 1.5px solid color-mix(in srgb, var(--poster-muted) 52%, transparent);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.poster-card #chicpage li input[type="checkbox"]:checked {
+  border-color: var(--poster-accent);
+  background:
+    radial-gradient(circle, var(--poster-accent) 0 43%, transparent 46%),
+    transparent;
+}
+
 .poster-card #chicpage blockquote {
   margin: 0.8em 0;
-  padding: 0.68em 0.78em;
-  border-left: 4px solid var(--poster-accent);
+  padding: 0.68em 0.82em;
+  border: 0;
   border-radius: 8px;
-  background: var(--poster-surface);
+  background: transparent;
   color: var(--poster-muted);
+  text-align: left;
+}
+
+.poster-card #chicpage blockquote p {
+  margin: 0.42em 0;
+  color: var(--poster-muted);
+  font-synthesis: style;
+  font-size: 1em;
+  font-style: italic;
+  line-height: inherit;
+}
+
+.poster-card #chicpage blockquote p::before {
+  content: "\"";
+}
+
+.poster-card #chicpage blockquote p::after {
+  content: "\"";
+}
+
+.poster-card #chicpage blockquote cite {
+  display: block;
+  margin-top: 0.86em;
+  color: color-mix(in srgb, var(--poster-muted) 72%, transparent);
+  font-family: var(--typeface);
+  font-size: 0.64em;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0.12em;
 }
 
 .poster-card #chicpage strong {
   color: var(--poster-ink);
   font-weight: 780;
+}
+
+.poster-card #chicpage em {
+  color: inherit;
+  font-synthesis: style;
+  font-style: italic;
+}
+
+.poster-card #chicpage del {
+  color: var(--poster-muted);
+  text-decoration: line-through;
 }
 
 .poster-card #chicpage table {
@@ -798,9 +895,10 @@ button:disabled {
 
 .poster-card #chicpage .poster-table-row {
   display: grid;
-  grid-template-columns: var(--poster-table-columns, minmax(8em, 0.72fr) minmax(0, 1.72fr));
+  grid-template-columns: var(--poster-table-columns, repeat(2, minmax(0, 1fr)));
   gap: 1.2em;
   align-items: start;
+  justify-content: space-between;
   padding: 0.72em 0;
   border-bottom: 1px solid color-mix(in srgb, var(--poster-border) 72%, transparent);
 }
@@ -815,6 +913,7 @@ button:disabled {
   color: var(--poster-ink);
   overflow-wrap: anywhere;
   word-break: break-word;
+  text-align: left;
 }
 
 .poster-card #chicpage .poster-table-body-row .poster-table-cell:first-child {
@@ -840,8 +939,8 @@ button:disabled {
   border: 1px solid color-mix(in srgb, var(--poster-border) 82%, transparent);
   border-radius: 8px;
   background: var(--poster-surface);
-  font-size: 0.62em;
-  line-height: 1.45;
+  font-size: 0.78em;
+  line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -1012,7 +1111,7 @@ button:disabled {
 @media (max-width: 1180px) {
   .studio-grid {
     grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-    height: calc(100vh - 64px);
+    height: 100vh;
   }
 
   .canvas-panel {
@@ -1021,15 +1120,10 @@ button:disabled {
 }
 
 @media (max-width: 780px) {
-  .studio-header {
-    min-height: 64px;
-    padding: 0 12px;
-  }
-
   .studio-grid {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 0.95fr) minmax(0, 1.05fr);
-    height: calc(100vh - 64px);
+    height: 100vh;
     padding: 12px;
   }
 

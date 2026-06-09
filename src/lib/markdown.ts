@@ -109,9 +109,7 @@ function getTableRows(table: Element) {
 }
 
 function getPosterTableColumns(count: number) {
-  if (count <= 1) return 'minmax(0, 1fr)';
-  if (count === 2) return 'minmax(8em, 0.72fr) minmax(0, 1.72fr)';
-  return `repeat(${count}, minmax(0, 1fr))`;
+  return `repeat(${Math.max(1, count)}, minmax(0, 1fr))`;
 }
 
 function rehypePosterTableRows() {

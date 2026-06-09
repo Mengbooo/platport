@@ -1,5 +1,5 @@
 import { Copy, ImageDown, LayoutGrid, Sparkles, Type, Upload, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './App.css';
 import { Button } from './components/ui/button';
@@ -24,6 +24,7 @@ import {
   getPosterTheme,
   getTheme,
 } from './lib/themes';
+import { APP_VERSION } from './lib/version';
 import { buildMarkdown, useEditorStore } from './store/useEditorStore';
 import type { PosterRatio, PosterThemeId, TypefaceId } from './types/editor';
 
@@ -51,11 +52,6 @@ function removeFirstHeading(html: string) {
   template.innerHTML = html;
   template.content.querySelector('h1')?.remove();
   return template.innerHTML;
-}
-
-function formatClock() {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
 
 function App() {
@@ -87,8 +83,7 @@ function App() {
 
   const [html, setHtml] = useState('');
   const [activePoster, setActivePoster] = useState(0);
-  const [status, setStatus] = useState('Ready');
-  const [savedAt, setSavedAt] = useState(formatClock);
+  const [, setStatus] = useState('Ready');
   const posterRefs = useRef<Array<HTMLElement | null>>([]);
   const posterScrollRef = useRef<HTMLDivElement | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
@@ -107,7 +102,7 @@ function App() {
       : viewportSize.width <= 1180
         ? viewportSize.width - 420
         : viewportSize.width - 520;
-  const previewMaxHeight = viewportSize.height - 150;
+  const previewMaxHeight = viewportSize.height - 96;
   const preferredPreviewWidth = posterRatio === '9:16' ? 430 : 520;
   const basePreviewWidth = Math.max(
     320,
@@ -159,19 +154,28 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
+  const scrollPosterIntoView = useCallback((index: number) => {
     const scroller = posterScrollRef.current;
-    const target = posterRefs.current[activeIndex]?.parentElement;
+    const target = scroller?.querySelectorAll<HTMLElement>('.poster-shell')[index];
     if (!scroller || !target) return;
 
     scroller.scrollTo({
-      left: target.offsetLeft - (scroller.clientWidth - target.clientWidth) / 2,
+      left: Math.max(0, target.offsetLeft - (scroller.clientWidth - target.clientWidth) / 2),
       behavior: 'smooth',
     });
-  }, [activeIndex, posterPages.length]);
+  }, []);
+
+  useEffect(() => {
+    scrollPosterIntoView(activeIndex);
+  }, [activeIndex, posterPages.length, scrollPosterIntoView]);
+
+  const focusPoster = (index: number) => {
+    setActivePoster(index);
+    scrollPosterIntoView(index);
+    requestAnimationFrame(() => scrollPosterIntoView(index));
+  };
 
   const markSaved = (nextStatus = 'Saved') => {
-    setSavedAt(formatClock());
     setStatus(nextStatus);
   };
 
@@ -247,7 +251,7 @@ function App() {
         data-theme={posterThemeId}
         data-cover={isCover}
         data-active={index === activeIndex}
-        onClick={() => setActivePoster(index)}
+        onClick={() => focusPoster(index)}
         style={{ aspectRatio: `${ratio.width} / ${ratio.height}` }}
       >
         {isCover ? (
@@ -281,272 +285,276 @@ function App() {
     <main className="app-shell" style={previewStyle}>
       <style>{articleTheme.css}</style>
 
-      <header className="studio-header">
-        <div className="brand">
-          <div className="brand-mark">
-            <Sparkles size={16} />
-          </div>
-          <div>
-            <strong>Platport</strong>
-            <span>{posterPages.length} cards · {status} · {savedAt}</span>
-          </div>
-        </div>
-      </header>
-
       <section className="studio-grid">
-        <Card className="editor-panel" size="sm">
-          <CardHeader>
-            <CardTitle>草稿 / 控制台</CardTitle>
-            <CardDescription>{stats.characters} 字 · {stats.readingMinutes} 分钟</CardDescription>
-          </CardHeader>
-          <CardContent className="editor-content">
-            <label className="field-block title-field">
-              <span>标题</span>
-              <input
-                value={noteTitle}
-                maxLength={90}
-                onChange={(event) => {
-                  setNoteTitle(event.target.value);
-                  markSaved();
-                }}
-              />
-            </label>
-
-            <label className="field-block summary-field">
-              <span>摘要</span>
-              <textarea
-                value={noteSummary}
-                maxLength={180}
-                onChange={(event) => {
-                  setNoteSummary(event.target.value);
-                  markSaved();
-                }}
-                spellCheck={false}
-              />
-            </label>
-
-            <label className="field-block tags-field">
-              <span>标签</span>
-              <input
-                value={hashtags}
-                onChange={(event) => {
-                  setHashtags(event.target.value);
-                  markSaved();
-                }}
-                placeholder="#小红书 #AI"
-              />
-            </label>
-
-            <label className="field-block body-field">
-              <span>Markdown 正文</span>
-              <textarea
-                value={noteBody}
-                onChange={(event) => {
-                  setNoteBody(event.target.value);
-                  markSaved();
-                }}
-                spellCheck={false}
-              />
-            </label>
-
-            <label className="field-block settings-field template-field">
-              <span>模板</span>
-              <div className="field-control">
-                <div className="theme-list">
-                  {POSTER_THEMES.map((theme) => (
-                    <button
-                      key={theme.id}
-                      type="button"
-                      className="theme-row"
-                      data-active={theme.id === posterThemeId}
-                      onClick={() => handleThemeChange(theme.id)}
-                    >
-                      <span className="theme-swatch" data-theme={theme.id} />
-                      <span>
-                        <strong>{theme.name}</strong>
-                        <small>{theme.description}</small>
-                      </span>
-                    </button>
-                  ))}
+        <section className="sidebar-column">
+          <Card className="brand-card" size="sm">
+            <CardContent className="brand-content">
+              <div className="brand">
+                <div className="brand-mark">
+                  <Sparkles size={16} />
+                </div>
+                <div>
+                  <strong>Platport</strong>
+                  <span>v{APP_VERSION}</span>
                 </div>
               </div>
-            </label>
+            </CardContent>
+          </Card>
 
-            <label className="field-block settings-field palette-field">
-              <span>配色</span>
-              <div className="field-control">
-                <div className="palette-list">
-                  {availablePalettes.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="palette-card"
-                      data-active={item.id === effectivePaletteId}
-                      onClick={() => {
-                        setPosterPaletteId(item.id);
-                        setStatus(`${item.name} applied`);
-                      }}
-                      title={item.name}
-                      aria-label={`配色 ${item.name}`}
-                    >
-                      <span className="palette-swatch" style={{ background: item.preview }} />
-                      <span>
-                        <strong>{item.name}</strong>
-                        <small>{item.description}</small>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </label>
-
-            <label className="field-block settings-field controls-field">
-              <span>控制</span>
-              <div className="field-control compact-fields">
-                <div className="select-field">
-                  <LayoutGrid size={15} />
-                  <Select
-                    value={posterRatio}
-                    onValueChange={(value) => {
-                      setPosterRatio(value as PosterRatio);
-                      setStatus('Ratio updated');
-                    }}
-                  >
-                    <SelectTrigger className="select-trigger" aria-label="贴图比例">
-                      <SelectValue placeholder="贴图比例" />
-                    </SelectTrigger>
-                    <SelectContent className="select-content" position="popper">
-                      {Object.entries(POSTER_RATIOS).map(([id, item]) => (
-                        <SelectItem key={id} value={id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="select-field">
-                  <Type size={15} />
-                  <Select
-                    value={typeface}
-                    onValueChange={(value) => {
-                      setTypeface(value as TypefaceId);
-                      setStatus('字体已更新');
-                    }}
-                  >
-                    <SelectTrigger className="select-trigger" aria-label="卡片字体">
-                      <SelectValue placeholder="卡片字体" />
-                    </SelectTrigger>
-                    <SelectContent className="select-content" position="popper">
-                      {Object.entries(TYPEFACES).map(([id, item]) => (
-                        <SelectItem key={id} value={id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </label>
-
-            <label className="field-block settings-field cover-field">
-              <span>封面</span>
-              <div className="field-control">
-                <button
-                  type="button"
-                  className="cover-uploader"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    coverInputRef.current?.click();
+          <Card className="editor-panel" size="sm">
+            <CardHeader>
+              <CardTitle>草稿 / 控制台</CardTitle>
+              <CardDescription>{stats.characters} 字 · {stats.readingMinutes} 分钟</CardDescription>
+            </CardHeader>
+            <CardContent className="editor-content">
+              <label className="field-block title-field">
+                <span>标题</span>
+                <input
+                  value={noteTitle}
+                  maxLength={90}
+                  onChange={(event) => {
+                    setNoteTitle(event.target.value);
+                    markSaved();
                   }}
-                >
-                  <div className="cover-thumb" data-empty={!coverImage}>
-                    {hasCoverImage ? <img src={coverImage} alt="" /> : <span>无图</span>}
+                />
+              </label>
+
+              <label className="field-block summary-field">
+                <span>摘要</span>
+                <textarea
+                  value={noteSummary}
+                  maxLength={180}
+                  onChange={(event) => {
+                    setNoteSummary(event.target.value);
+                    markSaved();
+                  }}
+                  spellCheck={false}
+                />
+              </label>
+
+              <label className="field-block tags-field">
+                <span>标签</span>
+                <input
+                  value={hashtags}
+                  onChange={(event) => {
+                    setHashtags(event.target.value);
+                    markSaved();
+                  }}
+                  placeholder="#小红书 #AI"
+                />
+              </label>
+
+              <label className="field-block body-field">
+                <span>Markdown 正文</span>
+                <textarea
+                  value={noteBody}
+                  onChange={(event) => {
+                    setNoteBody(event.target.value);
+                    markSaved();
+                  }}
+                  spellCheck={false}
+                />
+              </label>
+
+              <label className="field-block settings-field template-field">
+                <span>模板</span>
+                <div className="field-control">
+                  <div className="theme-list">
+                    {POSTER_THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        className="theme-row"
+                        data-active={theme.id === posterThemeId}
+                        onClick={() => handleThemeChange(theme.id)}
+                      >
+                        <span className="theme-swatch" data-theme={theme.id} />
+                        <span>
+                          <strong>{theme.name}</strong>
+                          <small>{theme.description}</small>
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <strong>{coverImage ? '替换封面图片' : '上传封面图片'}</strong>
-                    <span>截图、产品图或海报背景</span>
+                </div>
+              </label>
+
+              <label className="field-block settings-field palette-field">
+                <span>配色</span>
+                <div className="field-control">
+                  <div className="palette-list">
+                    {availablePalettes.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="palette-card"
+                        data-active={item.id === effectivePaletteId}
+                        onClick={() => {
+                          setPosterPaletteId(item.id);
+                          setStatus(`${item.name} applied`);
+                        }}
+                        title={item.name}
+                        aria-label={`配色 ${item.name}`}
+                      >
+                        <span className="palette-swatch" style={{ background: item.preview }} />
+                        <span>
+                          <strong>{item.name}</strong>
+                          <small>{item.description}</small>
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <Upload size={18} />
-                </button>
-                {coverImage ? (
-                  <Button
+                </div>
+              </label>
+
+              <label className="field-block settings-field controls-field">
+                <span>控制</span>
+                <div className="field-control compact-fields">
+                  <div className="select-field">
+                    <LayoutGrid size={15} />
+                    <Select
+                      value={posterRatio}
+                      onValueChange={(value) => {
+                        setPosterRatio(value as PosterRatio);
+                        setStatus('Ratio updated');
+                      }}
+                    >
+                      <SelectTrigger className="select-trigger" aria-label="贴图比例">
+                        <SelectValue placeholder="贴图比例" />
+                      </SelectTrigger>
+                      <SelectContent className="select-content" position="popper">
+                        {Object.entries(POSTER_RATIOS).map(([id, item]) => (
+                          <SelectItem key={id} value={id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="select-field">
+                    <Type size={15} />
+                    <Select
+                      value={typeface}
+                      onValueChange={(value) => {
+                        setTypeface(value as TypefaceId);
+                        setStatus('字体已更新');
+                      }}
+                    >
+                      <SelectTrigger className="select-trigger" aria-label="卡片字体">
+                        <SelectValue placeholder="卡片字体" />
+                      </SelectTrigger>
+                      <SelectContent className="select-content" position="popper">
+                        {Object.entries(TYPEFACES).map(([id, item]) => (
+                          <SelectItem key={id} value={id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </label>
+
+              <label className="field-block settings-field cover-field">
+                <span>封面</span>
+                <div className="field-control">
+                  <button
                     type="button"
-                    variant="outline"
+                    className="cover-uploader"
                     onClick={(event) => {
                       event.preventDefault();
-                      setCoverImage('');
-                      setStatus('Default cover restored');
+                      event.stopPropagation();
+                      coverInputRef.current?.click();
                     }}
                   >
-                    <X size={15} />
-                    移除
-                  </Button>
-                ) : null}
-              </div>
-            </label>
-            <input
-              ref={coverInputRef}
-              className="cover-input"
-              type="file"
-              accept="image/*"
-              onChange={(event) => handleCoverUpload(event.target.files?.[0])}
-            />
+                    <div className="cover-thumb" data-empty={!coverImage}>
+                      {hasCoverImage ? <img src={coverImage} alt="" /> : <span>无图</span>}
+                    </div>
+                    <div>
+                      <strong>{coverImage ? '替换封面图片' : '上传封面图片'}</strong>
+                      <span>截图、产品图或海报背景</span>
+                    </div>
+                    <Upload size={18} />
+                  </button>
+                  {coverImage ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setCoverImage('');
+                        setStatus('Default cover restored');
+                      }}
+                    >
+                      <X size={15} />
+                      移除
+                    </Button>
+                  ) : null}
+                </div>
+              </label>
+              <input
+                ref={coverInputRef}
+                className="cover-input"
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleCoverUpload(event.target.files?.[0])}
+              />
 
-            <label className="field-block settings-field caption-field">
-              <span>文案</span>
-              <div className="field-control">
-                <div className="caption-copy-section">
-                  <div className="caption-copy-field">
-                    <div className="caption-copy-header">
-                      <span>标题文案</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="复制标题文案"
-                        onClick={() => copyText(captionTitle, '标题已复制')}
-                      >
-                        <Copy size={14} />
-                      </Button>
+              <label className="field-block settings-field caption-field">
+                <span>文案</span>
+                <div className="field-control">
+                  <div className="caption-copy-section">
+                    <div className="caption-copy-field">
+                      <div className="caption-copy-header">
+                        <span>标题文案</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="复制标题文案"
+                          onClick={() => copyText(captionTitle, '标题已复制')}
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                      <div className="caption-copy-box">
+                        <p>{captionTitle}</p>
+                      </div>
                     </div>
-                    <div className="caption-copy-box">
-                      <p>{captionTitle}</p>
-                    </div>
-                  </div>
 
-                  <div className="caption-copy-field">
-                    <div className="caption-copy-header">
-                      <span>笔记文案</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="复制笔记文案"
-                        onClick={() => copyText(captionBody, '笔记文案已复制')}
-                      >
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                    <div className="caption-copy-box">
-                      {coverSummary ? <p>{coverSummary}</p> : null}
-                      <div className="caption-tag-list">
-                        {tags.slice(0, 8).map((tag) => (
-                          <span key={tag}>{tag}</span>
-                        ))}
+                    <div className="caption-copy-field">
+                      <div className="caption-copy-header">
+                        <span>笔记文案</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="复制笔记文案"
+                          onClick={() => copyText(captionBody, '笔记文案已复制')}
+                        >
+                          <Copy size={14} />
+                        </Button>
+                      </div>
+                      <div className="caption-copy-box">
+                        {coverSummary ? <p>{coverSummary}</p> : null}
+                        <div className="caption-tag-list">
+                          {tags.slice(0, 8).map((tag) => (
+                            <span key={tag}>{tag}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </label>
+              </label>
 
-            <Button className="export-button" onClick={handleExportPosters}>
-              <ImageDown size={15} />
-              导出卡片
-            </Button>
-          </CardContent>
-        </Card>
+              <Button className="export-button" onClick={handleExportPosters}>
+                <ImageDown size={15} />
+                导出卡片
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
 
         <section className="canvas-panel">
           <div className="canvas-toolbar">
@@ -583,7 +591,7 @@ function App() {
                 key={index}
                 type="button"
                 data-active={index === activeIndex}
-                onClick={() => setActivePoster(index)}
+                onClick={() => focusPoster(index)}
                 aria-label={`第 ${index + 1} 张`}
               >
                 {index + 1}

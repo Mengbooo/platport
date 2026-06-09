@@ -185,7 +185,7 @@ export const useEditorStore = create<EditorState>()(
     }),
     {
       name: 'platport-editor',
-      version: 3,
+      version: 4,
       migrate: (persisted) => {
         const state = persisted as Partial<EditorState>;
         return {

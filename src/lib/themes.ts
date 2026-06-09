@@ -80,9 +80,6 @@ const BASE_CSS = `
   #chicpage blockquote {
     margin: 1.55em 0;
     padding: 16px 18px;
-    border: 0;
-    border-left: 4px solid var(--cp-accent);
-    border-radius: 8px;
     background: var(--cp-quote-bg);
     color: var(--cp-quote-ink);
   }
@@ -256,7 +253,6 @@ export const FORMAT_THEMES: FormatTheme[] = [
       }
       #chicpage blockquote {
         border-left: 0;
-        box-shadow: inset 0 0 0 1px var(--cp-border);
       }
     `,
   }),
