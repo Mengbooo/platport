@@ -129,12 +129,19 @@ function splitTextElement(element: HTMLElement, ratio: PosterRatio) {
 }
 
 function splitList(element: HTMLElement) {
-  const cloneTag = element.tagName.toLowerCase();
-  return Array.from(element.children).map((child) => {
-    const list = document.createElement(cloneTag);
-    list.appendChild(child.cloneNode(true));
-    return list;
-  });
+  return Array.from(element.children).map((child, index) =>
+    createListChunk(element, [child], index),
+  );
+}
+
+function createListChunk(source: HTMLElement, items: Element[], startIndex: number) {
+  const list = source.cloneNode(false) as HTMLElement;
+  if (source.tagName.toLowerCase() === 'ol') {
+    const start = Number(source.getAttribute('start') ?? 1);
+    list.setAttribute('start', String(start + startIndex));
+  }
+  items.forEach((item) => list.appendChild(item.cloneNode(true)));
+  return list;
 }
 
 function splitTable(element: HTMLElement) {
@@ -294,6 +301,59 @@ function paginateTableAcrossPages(node: Node, content: HTMLElement, pages: strin
   return false;
 }
 
+function paginateListAcrossPages(node: Node, content: HTMLElement, pages: string[]) {
+  if (node.nodeType !== Node.ELEMENT_NODE) return false;
+
+  const element = node as HTMLElement;
+  const tag = element.tagName.toLowerCase();
+  if (tag !== 'ul' && tag !== 'ol') return false;
+
+  const items = Array.from(element.children).filter((child) =>
+    child.tagName.toLowerCase() === 'li',
+  );
+  if (items.length === 0) return false;
+
+  let packedItems: Element[] = [];
+  let packedStart = 0;
+
+  items.forEach((item, index) => {
+    const nextItems = [...packedItems, item];
+    const nextChunk = createListChunk(element, nextItems, packedStart);
+
+    if (canAppend(content, nextChunk)) {
+      packedItems = nextItems;
+      return;
+    }
+
+    if (packedItems.length > 0) {
+      appendClone(content, createListChunk(element, packedItems, packedStart));
+      flushPage(pages, content);
+      packedItems = [];
+      packedStart = index;
+    } else {
+      flushPage(pages, content);
+      packedStart = index;
+    }
+
+    const singleItem = createListChunk(element, [item], index);
+    if (canAppend(content, singleItem)) {
+      packedItems = [item];
+      return;
+    }
+
+    singleItem.classList.add('poster-scale-down');
+    appendClone(content, singleItem);
+    flushPage(pages, content);
+    packedStart = index + 1;
+  });
+
+  if (packedItems.length > 0) {
+    appendClone(content, createListChunk(element, packedItems, packedStart));
+  }
+
+  return true;
+}
+
 function splitPre(element: HTMLElement, ratio: PosterRatio) {
   const code = element.textContent ?? '';
   const lineLimit = ratio === '9:16' ? 18 : ratio === '1:1' ? 8 : 12;
@@ -347,6 +407,7 @@ export function paginateHtmlByHeight(html: string, ratio: PosterRatio, fontFamil
       if (appendAndMeasure(content, node)) return;
 
       if (paginateTableAcrossPages(node, content, pages)) return;
+      if (paginateListAcrossPages(node, content, pages)) return;
 
       flushPage(pages, content);
       if (appendAndMeasure(content, node)) return;
