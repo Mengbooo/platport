@@ -1,4 +1,6 @@
 import type {
+  CodeTheme,
+  CodeThemeId,
   FormatTheme,
   PosterPalette,
   PosterPaletteId,
@@ -466,6 +468,46 @@ export const TYPEFACES: Record<TypefaceId, { name: string; value: string }> = {
   mono: { name: '等宽', value: fontStacks.mono },
   kai: { name: '手写', value: fontStacks.kai },
 };
+
+const DARK_CODE_THEME: CodeTheme = {
+  id: 'ink',
+  name: '墨色代码',
+  bg: '#1f2933',
+  ink: '#e9f1f7',
+  border: '#3f4d5c',
+  string: '#8fe6c6',
+  number: '#f5c27a',
+  keyword: '#8bb8ff',
+  quoteBg: '#1a242d',
+  quoteInk: '#d4e2ed',
+  quoteBorder: '#6ea8ff',
+};
+
+const LIGHT_CODE_THEME: CodeTheme = {
+  id: 'paper',
+  name: '纸面代码',
+  bg: '#eef4fb',
+  ink: '#233142',
+  border: '#c9d7e6',
+  string: '#147d64',
+  number: '#9a5a16',
+  keyword: '#315db5',
+  quoteBg: '#f2f6fa',
+  quoteInk: '#33465c',
+  quoteBorder: '#7da2cf',
+};
+
+export const CODE_THEMES: Record<CodeThemeId, { name: string }> = {
+  auto: { name: '跟随模板' },
+  ink: { name: DARK_CODE_THEME.name },
+  paper: { name: LIGHT_CODE_THEME.name },
+};
+
+export function getCodeTheme(id: CodeThemeId, posterThemeId: PosterThemeId) {
+  if (id === 'ink') return DARK_CODE_THEME;
+  if (id === 'paper') return LIGHT_CODE_THEME;
+  return posterThemeId === 'dark-reader' ? DARK_CODE_THEME : LIGHT_CODE_THEME;
+}
 
 export const POSTER_RATIOS: Record<PosterRatio, { name: string; width: number; height: number }> = {
   '3:4': { name: '3:4', width: 720, height: 960 },

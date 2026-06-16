@@ -808,16 +808,17 @@ button:disabled {
 .poster-card #chicpage blockquote {
   margin: 0.8em 0;
   padding: 0.68em 0.82em;
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--poster-quote-border) 52%, transparent);
+  border-left: 4px solid var(--poster-quote-border);
   border-radius: 8px;
-  background: transparent;
-  color: var(--poster-muted);
+  background: var(--poster-quote-bg);
+  color: var(--poster-quote-ink);
   text-align: left;
 }
 
 .poster-card #chicpage blockquote p {
   margin: 0.42em 0;
-  color: var(--poster-muted);
+  color: var(--poster-quote-ink);
   font-synthesis: style;
   font-size: 1em;
   font-style: italic;
@@ -936,9 +937,10 @@ button:disabled {
   max-width: 100%;
   margin: 0.72em 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--poster-border) 82%, transparent);
+  border: 1px solid var(--poster-code-border);
   border-radius: 8px;
-  background: var(--poster-surface);
+  background: var(--poster-code-bg);
+  color: var(--poster-code-ink);
   font-size: 0.78em;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -947,15 +949,49 @@ button:disabled {
 
 .poster-card #chicpage pre code {
   display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   padding: 0.72em;
+  color: var(--poster-code-ink);
+  font-size: inherit;
   white-space: pre-wrap;
 }
 
 .poster-card #chicpage code {
+  border: 1px solid color-mix(in srgb, var(--poster-code-border) 74%, transparent);
   border-radius: 4px;
-  background: var(--poster-surface);
+  background: var(--poster-code-bg);
+  color: var(--poster-code-ink);
   font-size: 0.82em;
   overflow-wrap: anywhere;
+  padding: 0.06em 0.28em;
+}
+
+.poster-card #chicpage .hljs-comment,
+.poster-card #chicpage .hljs-quote {
+  color: color-mix(in srgb, var(--poster-code-ink) 62%, transparent);
+  font-style: italic;
+}
+
+.poster-card #chicpage .hljs-keyword,
+.poster-card #chicpage .hljs-selector-tag,
+.poster-card #chicpage .hljs-literal,
+.poster-card #chicpage .hljs-title,
+.poster-card #chicpage .hljs-section {
+  color: var(--poster-code-keyword);
+}
+
+.poster-card #chicpage .hljs-string,
+.poster-card #chicpage .hljs-attr,
+.poster-card #chicpage .hljs-template-variable {
+  color: var(--poster-code-string);
+}
+
+.poster-card #chicpage .hljs-number,
+.poster-card #chicpage .hljs-symbol,
+.poster-card #chicpage .hljs-variable {
+  color: var(--poster-code-number);
 }
 
 .poster-card #chicpage img {
@@ -977,6 +1013,15 @@ button:disabled {
   --poster-accent: inherit;
   --poster-border: inherit;
   --poster-surface: inherit;
+  --poster-code-bg: inherit;
+  --poster-code-ink: inherit;
+  --poster-code-border: inherit;
+  --poster-code-string: inherit;
+  --poster-code-number: inherit;
+  --poster-code-keyword: inherit;
+  --poster-quote-bg: inherit;
+  --poster-quote-ink: inherit;
+  --poster-quote-border: inherit;
 }
 
 .poster-card-measure {

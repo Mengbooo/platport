@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {
+  CodeThemeId,
   LayoutMode,
   PosterPaletteId,
   PosterRatio,
@@ -86,6 +87,7 @@ interface EditorState {
   layoutMode: LayoutMode;
   posterRatio: PosterRatio;
   typeface: TypefaceId;
+  codeTheme: CodeThemeId;
   imageRadius: number;
   showChrome: boolean;
   past: HistoryItem[];
@@ -106,6 +108,7 @@ interface EditorState {
   setLayoutMode: (layoutMode: LayoutMode) => void;
   setPosterRatio: (posterRatio: PosterRatio) => void;
   setTypeface: (typeface: TypefaceId) => void;
+  setCodeTheme: (codeTheme: CodeThemeId) => void;
   setImageRadius: (imageRadius: number) => void;
   setShowChrome: (showChrome: boolean) => void;
 }
@@ -126,6 +129,7 @@ export const useEditorStore = create<EditorState>()(
       layoutMode: 'split',
       posterRatio: '3:4',
       typeface: 'serif',
+      codeTheme: 'auto',
       imageRadius: 12,
       showChrome: true,
       past: [],
@@ -180,12 +184,13 @@ export const useEditorStore = create<EditorState>()(
       setLayoutMode: (layoutMode) => set({ layoutMode }),
       setPosterRatio: (posterRatio) => set({ posterRatio }),
       setTypeface: (typeface) => set({ typeface }),
+      setCodeTheme: (codeTheme) => set({ codeTheme }),
       setImageRadius: (imageRadius) => set({ imageRadius }),
       setShowChrome: (showChrome) => set({ showChrome }),
     }),
     {
       name: 'platport-editor',
-      version: 4,
+      version: 5,
       migrate: (persisted) => {
         const state = persisted as Partial<EditorState>;
         return {
@@ -201,6 +206,7 @@ export const useEditorStore = create<EditorState>()(
           layoutMode: state.layoutMode || 'split',
           posterRatio: '3:4' as PosterRatio,
           typeface: 'serif' as TypefaceId,
+          codeTheme: state.codeTheme || 'auto',
           imageRadius: state.imageRadius ?? 12,
           showChrome: state.showChrome ?? true,
           markdown: buildMarkdown(state.noteTitle || INITIAL_TITLE, state.noteBody || INITIAL_BODY),
@@ -219,6 +225,7 @@ export const useEditorStore = create<EditorState>()(
         layoutMode: state.layoutMode,
         posterRatio: state.posterRatio,
         typeface: state.typeface,
+        codeTheme: state.codeTheme,
         imageRadius: state.imageRadius,
         showChrome: state.showChrome,
       }),

@@ -80,6 +80,18 @@ function appendAndMeasure(content: HTMLElement, node: Node) {
   return didFit;
 }
 
+function canAppend(content: HTMLElement, node: Node) {
+  const clone = node.cloneNode(true);
+  content.appendChild(clone);
+  const didFit = fits(content);
+  content.removeChild(clone);
+  return didFit;
+}
+
+function appendClone(content: HTMLElement, node: Node) {
+  content.appendChild(node.cloneNode(true));
+}
+
 function textChunks(text: string, preferredSize: number) {
   const normalized = text.replace(/\s+/g, ' ').trim();
   if (!normalized) return [];
@@ -157,6 +169,131 @@ function splitPosterTable(element: HTMLElement) {
   });
 }
 
+function createPosterTableChunk(source: HTMLElement, rows: Element[], headRows: Element[]) {
+  const table = source.cloneNode(false) as HTMLElement;
+  headRows.forEach((row) => table.appendChild(row.cloneNode(true)));
+  rows.forEach((row) => table.appendChild(row.cloneNode(true)));
+  return table;
+}
+
+function paginatePosterTable(
+  element: HTMLElement,
+  content: HTMLElement,
+  pages: string[],
+) {
+  const rows = Array.from(element.children).filter((child) =>
+    child.classList.contains('poster-table-row'),
+  );
+  const headRows = rows.filter((row) => row.classList.contains('poster-table-head'));
+  const bodyRows = rows.filter((row) => !row.classList.contains('poster-table-head'));
+  const rowsToPack = bodyRows.length > 0 ? bodyRows : rows;
+
+  if (rowsToPack.length === 0) return false;
+
+  let packedRows: Element[] = [];
+
+  rowsToPack.forEach((row) => {
+    const nextRows = [...packedRows, row];
+    const nextChunk = createPosterTableChunk(element, nextRows, bodyRows.length > 0 ? headRows : []);
+
+    if (canAppend(content, nextChunk)) {
+      packedRows = nextRows;
+      return;
+    }
+
+    if (packedRows.length > 0) {
+      appendClone(
+        content,
+        createPosterTableChunk(element, packedRows, bodyRows.length > 0 ? headRows : []),
+      );
+      flushPage(pages, content);
+      packedRows = [];
+    } else {
+      flushPage(pages, content);
+    }
+
+    const singleRow = createPosterTableChunk(element, [row], bodyRows.length > 0 ? headRows : []);
+    if (canAppend(content, singleRow)) {
+      packedRows = [row];
+      return;
+    }
+
+    singleRow.classList.add('poster-scale-down');
+    appendClone(content, singleRow);
+    flushPage(pages, content);
+  });
+
+  if (packedRows.length > 0) {
+    appendClone(
+      content,
+      createPosterTableChunk(element, packedRows, bodyRows.length > 0 ? headRows : []),
+    );
+  }
+
+  return true;
+}
+
+function createNativeTableChunk(source: HTMLElement, rows: HTMLTableRowElement[]) {
+  const table = source.cloneNode(false) as HTMLTableElement;
+  const head = (source as HTMLTableElement).querySelector('thead')?.cloneNode(true);
+  if (head) table.appendChild(head);
+
+  const tbody = document.createElement('tbody');
+  rows.forEach((row) => tbody.appendChild(row.cloneNode(true)));
+  table.appendChild(tbody);
+  return table;
+}
+
+function paginateNativeTable(element: HTMLElement, content: HTMLElement, pages: string[]) {
+  const table = element as HTMLTableElement;
+  const bodyRows = Array.from(table.tBodies).flatMap((body) => Array.from(body.rows));
+  const rows = bodyRows.length > 0 ? bodyRows : Array.from(table.rows).filter((row) => !row.closest('thead'));
+
+  if (rows.length === 0) return false;
+
+  let packedRows: HTMLTableRowElement[] = [];
+
+  rows.forEach((row) => {
+    const nextRows = [...packedRows, row];
+    const nextChunk = createNativeTableChunk(element, nextRows);
+
+    if (canAppend(content, nextChunk)) {
+      packedRows = nextRows;
+      return;
+    }
+
+    if (packedRows.length > 0) {
+      appendClone(content, createNativeTableChunk(element, packedRows));
+      flushPage(pages, content);
+      packedRows = [];
+    } else {
+      flushPage(pages, content);
+    }
+
+    const singleRow = createNativeTableChunk(element, [row]);
+    if (canAppend(content, singleRow)) {
+      packedRows = [row];
+      return;
+    }
+
+    singleRow.classList.add('poster-scale-down');
+    appendClone(content, singleRow);
+    flushPage(pages, content);
+  });
+
+  if (packedRows.length > 0) appendClone(content, createNativeTableChunk(element, packedRows));
+  return true;
+}
+
+function paginateTableAcrossPages(node: Node, content: HTMLElement, pages: string[]) {
+  if (node.nodeType !== Node.ELEMENT_NODE) return false;
+
+  const element = node as HTMLElement;
+  if (element.classList.contains('poster-table')) return paginatePosterTable(element, content, pages);
+  if (element.tagName.toLowerCase() === 'table') return paginateNativeTable(element, content, pages);
+  return false;
+}
+
 function splitPre(element: HTMLElement, ratio: PosterRatio) {
   const code = element.textContent ?? '';
   const lineLimit = ratio === '9:16' ? 18 : ratio === '1:1' ? 8 : 12;
@@ -208,6 +345,8 @@ export function paginateHtmlByHeight(html: string, ratio: PosterRatio, fontFamil
       }
 
       if (appendAndMeasure(content, node)) return;
+
+      if (paginateTableAcrossPages(node, content, pages)) return;
 
       flushPage(pages, content);
       if (appendAndMeasure(content, node)) return;

@@ -6,6 +6,8 @@ export type PosterRatio = '3:4' | '4:5' | '9:16' | '1:1';
 
 export type TypefaceId = 'system' | 'serif' | 'mono' | 'kai';
 
+export type CodeThemeId = 'auto' | 'ink' | 'paper';
+
 export type PosterThemeId = 'dark-reader' | 'classic-paper' | 'ios-note' | 'blue-marker';
 
 export type PosterPaletteId =
@@ -58,6 +60,20 @@ export interface PosterTheme {
   id: PosterThemeId;
   name: string;
   description: string;
+}
+
+export interface CodeTheme {
+  id: CodeThemeId;
+  name: string;
+  bg: string;
+  ink: string;
+  border: string;
+  string: string;
+  number: string;
+  keyword: string;
+  quoteBg: string;
+  quoteInk: string;
+  quoteBorder: string;
 }
 
 export interface FormatTheme {

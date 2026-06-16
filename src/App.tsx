@@ -1,4 +1,4 @@
-import { Copy, ImageDown, LayoutGrid, Sparkles, Type, Upload, X } from 'lucide-react';
+import { Copy, ImageDown, LayoutGrid, Palette, Sparkles, Type, Upload, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './App.css';
@@ -15,10 +15,12 @@ import { usePosterPages } from './hooks/usePosterPages';
 import { exportPosterImages } from './lib/export';
 import { getStats, markdownToHtml } from './lib/markdown';
 import {
+  CODE_THEMES,
   POSTER_PALETTES,
   POSTER_RATIOS,
   POSTER_THEMES,
   TYPEFACES,
+  getCodeTheme,
   getDefaultPaletteId,
   getPosterPalette,
   getPosterTheme,
@@ -26,7 +28,7 @@ import {
 } from './lib/themes';
 import { APP_VERSION } from './lib/version';
 import { buildMarkdown, useEditorStore } from './store/useEditorStore';
-import type { PosterRatio, PosterThemeId, TypefaceId } from './types/editor';
+import type { CodeThemeId, PosterRatio, PosterThemeId, TypefaceId } from './types/editor';
 
 const GOOGLE_SANS_STACK =
   '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif';
@@ -70,6 +72,7 @@ function App() {
     posterPaletteId,
     posterRatio,
     typeface,
+    codeTheme,
     setNoteTitle,
     setNoteSummary,
     setNoteBody,
@@ -79,6 +82,7 @@ function App() {
     setPosterPaletteId,
     setPosterRatio,
     setTypeface,
+    setCodeTheme,
   } = useEditorStore();
 
   const [html, setHtml] = useState('');
@@ -95,6 +99,7 @@ function App() {
     ? posterPaletteId
     : getDefaultPaletteId(posterThemeId);
   const palette = getPosterPalette(posterThemeId, effectivePaletteId);
+  const codeColors = getCodeTheme(codeTheme, posterThemeId);
   const ratio = POSTER_RATIOS[posterRatio];
   const previewMaxWidth =
     viewportSize.width < 780
@@ -230,6 +235,15 @@ function App() {
     '--poster-border': palette.border,
     '--poster-surface': palette.surface,
     '--poster-image-bg': palette.imageBackdrop,
+    '--poster-code-bg': codeColors.bg,
+    '--poster-code-ink': codeColors.ink,
+    '--poster-code-border': codeColors.border,
+    '--poster-code-string': codeColors.string,
+    '--poster-code-number': codeColors.number,
+    '--poster-code-keyword': codeColors.keyword,
+    '--poster-quote-bg': codeColors.quoteBg,
+    '--poster-quote-ink': codeColors.quoteInk,
+    '--poster-quote-border': codeColors.quoteBorder,
     '--poster-width': `${ratio.width}px`,
     '--poster-height': `${ratio.height}px`,
     '--typeface': typefaceValue,
@@ -445,6 +459,27 @@ function App() {
                       </SelectTrigger>
                       <SelectContent className="select-content" position="popper">
                         {Object.entries(TYPEFACES).map(([id, item]) => (
+                          <SelectItem key={id} value={id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="select-field">
+                    <Palette size={15} />
+                    <Select
+                      value={codeTheme}
+                      onValueChange={(value) => {
+                        setCodeTheme(value as CodeThemeId);
+                        setStatus('代码颜色已更新');
+                      }}
+                    >
+                      <SelectTrigger className="select-trigger" aria-label="代码颜色主题">
+                        <SelectValue placeholder="代码颜色" />
+                      </SelectTrigger>
+                      <SelectContent className="select-content" position="popper">
+                        {Object.entries(CODE_THEMES).map(([id, item]) => (
                           <SelectItem key={id} value={id}>
                             {item.name}
                           </SelectItem>
