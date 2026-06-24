@@ -11,6 +11,8 @@ const STYLE_PROPERTIES = [
   'letterSpacing',
   'textAlign',
   'textDecoration',
+  'textIndent',
+  'whiteSpace',
   'wordBreak',
   'overflowWrap',
   'display',
@@ -25,9 +27,10 @@ const STYLE_PROPERTIES = [
   'paddingRight',
   'paddingBottom',
   'paddingLeft',
-  'width',
   'maxWidth',
-  'height',
+  'maxHeight',
+  'overflowX',
+  'overflowY',
   'background',
   'backgroundColor',
   'backgroundImage',
@@ -67,7 +70,112 @@ function timestamp() {
   )}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 }
 
-export function inlineComputedStyles(source: HTMLElement): string {
+function setDarkModeAttrs(element: HTMLElement, computed: CSSStyleDeclaration) {
+  if (computed.backgroundColor && computed.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+    element.setAttribute('data-darkmode-bgcolor', computed.backgroundColor);
+    element.setAttribute('data-darkmode-original-bgcolor', computed.backgroundColor);
+  }
+
+  if (computed.color) {
+    element.setAttribute('data-darkmode-color', computed.color);
+    element.setAttribute('data-darkmode-original-color', computed.color);
+  }
+}
+
+function applyWechatOptimizations(element: HTMLElement, computed: CSSStyleDeclaration) {
+  const tag = element.tagName;
+
+  if (tag === 'IMG') {
+    element.style.maxWidth = '100%';
+    element.style.height = 'auto';
+    element.style.display = 'block';
+    element.style.margin = element.style.margin || '1.5em auto';
+    element.style.border = 'none';
+    element.style.outline = 'none';
+    element.setAttribute('data-darkmode-bgcolor', 'transparent');
+    element.setAttribute('data-darkmode-original-bgcolor', 'transparent');
+    return;
+  }
+
+  if (tag === 'PRE') {
+    element.style.maxWidth = '100%';
+    element.style.maxHeight = '360px';
+    element.style.overflowX = 'auto';
+    element.style.overflowY = 'auto';
+    element.style.whiteSpace = 'pre';
+    setDarkModeAttrs(element, computed);
+    return;
+  }
+
+  if (tag === 'CODE') {
+    const isInline = element.parentElement?.tagName !== 'PRE';
+    element.style.fontFamily = 'Consolas, Monaco, "Courier New", monospace';
+    if (isInline) {
+      element.style.fontSize = element.style.fontSize || '85%';
+      element.style.borderRadius = element.style.borderRadius || '3px';
+    } else {
+      element.style.display = 'block';
+      element.style.whiteSpace = 'pre';
+      element.style.wordBreak = 'normal';
+    }
+    setDarkModeAttrs(element, computed);
+    return;
+  }
+
+  if (tag === 'P') {
+    element.style.lineHeight = element.style.lineHeight || '1.75';
+    return;
+  }
+
+  if (tag === 'A') {
+    element.style.wordBreak = 'break-all';
+    element.style.textDecoration = element.style.textDecoration || 'underline';
+    return;
+  }
+
+  if (tag === 'UL' || tag === 'OL') {
+    element.style.paddingLeft = element.style.paddingLeft || '2em';
+    element.style.margin = element.style.margin || '1.2em 0';
+    return;
+  }
+
+  if (tag === 'LI') {
+    element.style.lineHeight = element.style.lineHeight || '1.75';
+    element.style.listStylePosition = element.style.listStylePosition || 'outside';
+    return;
+  }
+
+  if (tag === 'HR') {
+    element.style.border = 'none';
+    element.style.height = '1px';
+    element.style.margin = element.style.margin || '2em 0';
+    return;
+  }
+
+  if (tag === 'TABLE') {
+    element.style.width = '100%';
+    element.style.borderCollapse = 'collapse';
+    element.style.maxWidth = '100%';
+    return;
+  }
+
+  if (tag === 'TH' || tag === 'TD') {
+    element.style.wordBreak = 'break-word';
+    element.style.overflowWrap = 'anywhere';
+    element.style.verticalAlign = 'top';
+    return;
+  }
+
+  if (tag === 'INPUT' && element.getAttribute('type') === 'checkbox') {
+    element.style.pointerEvents = 'none';
+  }
+}
+
+interface InlineOptions {
+  rootCssText?: string;
+}
+
+export function inlineComputedStyles(source: HTMLElement, options: InlineOptions = {}): string {
   const clone = source.cloneNode(true) as HTMLElement;
   const sourceNodes = [source, ...Array.from(source.querySelectorAll('*'))] as HTMLElement[];
   const cloneNodes = [clone, ...Array.from(clone.querySelectorAll('*'))] as HTMLElement[];
@@ -89,22 +197,18 @@ export function inlineComputedStyles(source: HTMLElement): string {
       }
     });
 
-    if (target.tagName === 'IMG') {
-      target.style.maxWidth = '100%';
-      target.style.height = 'auto';
-      target.style.display = 'block';
-    }
-
-    if (target.tagName === 'P') {
-      target.style.textAlign = 'justify';
-    }
+    applyWechatOptimizations(target, computed);
   });
+
+  if (options.rootCssText) {
+    clone.style.cssText += `;${options.rootCssText}`;
+  }
 
   return clone.outerHTML;
 }
 
-export async function copyRichHtml(element: HTMLElement): Promise<void> {
-  const html = inlineComputedStyles(element);
+export async function copyRichHtml(element: HTMLElement, options: InlineOptions = {}): Promise<void> {
+  const html = inlineComputedStyles(element, options);
   const plainText = element.innerText;
 
   if ('ClipboardItem' in window && navigator.clipboard?.write) {
@@ -120,7 +224,7 @@ export async function copyRichHtml(element: HTMLElement): Promise<void> {
   await navigator.clipboard.writeText(html);
 }
 
-export function exportHtml(element: HTMLElement) {
+export function exportHtml(element: HTMLElement, options: InlineOptions = {}) {
   const html = `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -129,7 +233,7 @@ export function exportHtml(element: HTMLElement) {
   <title>Platport Export</title>
 </head>
 <body>
-${inlineComputedStyles(element)}
+${inlineComputedStyles(element, options)}
 </body>
 </html>`;
   downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), `platport-${timestamp()}.html`);

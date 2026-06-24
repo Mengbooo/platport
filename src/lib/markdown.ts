@@ -19,6 +19,10 @@ interface ImageNode extends Node {
   };
 }
 
+interface MarkdownToHtmlOptions {
+  posterTables?: boolean;
+}
+
 function remarkImageSizePlugin() {
   return (tree: Node) => {
     let imageIndex = 0;
@@ -158,20 +162,28 @@ function rehypePosterTableRows() {
   };
 }
 
-export async function markdownToHtml(markdown: string): Promise<string> {
+export async function markdownToHtml(
+  markdown: string,
+  options: MarkdownToHtmlOptions = {},
+): Promise<string> {
   const normalized = markdown.replace(
     /<!--\s*pagebreak\s*-->/gi,
     '\n<hr data-pagebreak="true" />\n',
   );
 
-  const result = await unified()
+  const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkImageSizePlugin)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
-    .use(rehypeHighlightedCodeBlock)
-    .use(rehypePosterTableRows)
+    .use(rehypeHighlightedCodeBlock);
+
+  if (options.posterTables) {
+    processor.use(rehypePosterTableRows);
+  }
+
+  const result = await processor
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(normalized);
 

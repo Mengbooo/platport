@@ -11,11 +11,11 @@ import type {
 } from '../types/editor';
 
 const BASE_CSS = `
-  #chicpage, #chicpage * { box-sizing: border-box; }
-  #chicpage {
-    color: var(--cp-ink);
-    background: var(--cp-paper);
-    font-family: var(--cp-font);
+  .platport-content, .platport-content * { box-sizing: border-box; }
+  .platport-content {
+    color: var(--format-ink);
+    background: var(--format-paper);
+    font-family: var(--format-font);
     font-size: 16px;
     line-height: 1.86;
     word-break: break-word;
@@ -24,163 +24,211 @@ const BASE_CSS = `
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  #chicpage > *:first-child { margin-top: 0; }
-  #chicpage > *:last-child { margin-bottom: 0; }
-  #chicpage h1,
-  #chicpage h2,
-  #chicpage h3,
-  #chicpage h4 {
-    color: var(--cp-ink);
-    font-family: var(--cp-heading);
+  .platport-content > *:first-child { margin-top: 0; }
+  .platport-content > *:last-child { margin-bottom: 0; }
+  .platport-content h1,
+  .platport-content h2,
+  .platport-content h3,
+  .platport-content h4 {
+    color: var(--format-ink);
+    font-family: var(--format-heading);
     font-weight: 760;
     letter-spacing: 0;
   }
-  #chicpage h1 {
+  .platport-content h1 {
     font-size: 2.08em;
     line-height: 1.18;
     margin: 0.35em 0 0.88em;
   }
-  #chicpage h2 {
+  .platport-content h2 {
     font-size: 1.48em;
     line-height: 1.28;
     margin: 1.8em 0 0.7em;
   }
-  #chicpage h3 {
+  .platport-content h3 {
     font-size: 1.17em;
     line-height: 1.36;
     margin: 1.45em 0 0.45em;
   }
-  #chicpage h4,
-  #chicpage h5,
-  #chicpage h6 {
+  .platport-content h4,
+  .platport-content h5,
+  .platport-content h6 {
     font-size: 1.02em;
     line-height: 1.4;
     margin: 1.25em 0 0.35em;
   }
-  #chicpage p {
+  .platport-content p {
     margin: 0.98em 0;
-    color: var(--cp-ink);
+    color: var(--format-ink);
   }
-  #chicpage a {
-    color: var(--cp-accent);
+  .platport-content a {
+    color: var(--format-accent);
     text-decoration: underline;
     text-underline-offset: 4px;
     text-decoration-thickness: 1px;
   }
-  #chicpage strong {
-    color: var(--cp-strong, var(--cp-ink));
+  .platport-content strong {
+    color: var(--format-strong, var(--format-ink));
     font-weight: 760;
   }
-  #chicpage em { color: var(--cp-muted); }
-  #chicpage ul,
-  #chicpage ol {
+  .platport-content em { color: var(--format-muted); }
+  .platport-content ul,
+  .platport-content ol {
     margin: 1em 0;
     padding-left: 1.35em;
   }
-  #chicpage li { margin: 0.42em 0; padding-left: 0.15em; }
-  #chicpage li::marker { color: var(--cp-accent); font-weight: 700; }
-  #chicpage blockquote {
+  .platport-content ul { list-style: disc; }
+  .platport-content ol { list-style: decimal; }
+  .platport-content li { margin: 0.42em 0; padding-left: 0.15em; }
+  .platport-content li { display: list-item; }
+  .platport-content li::marker { color: var(--format-accent); font-weight: 700; }
+  .platport-content ul.contains-task-list {
+    padding-left: 0;
+    list-style: none;
+  }
+  .platport-content li:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    list-style: none;
+    padding-left: 0;
+  }
+  .platport-content blockquote {
     margin: 1.55em 0;
     padding: 16px 18px;
-    background: var(--cp-quote-bg);
-    color: var(--cp-quote-ink);
+    background: var(--format-quote-bg);
+    color: var(--format-quote-ink);
   }
-  #chicpage blockquote p {
+  .platport-content blockquote p {
     color: inherit;
     margin: 0.45em 0;
   }
-  #chicpage hr {
+  .platport-content hr {
     border: 0;
     height: 1px;
     margin: 2.4em 0;
-    background: linear-gradient(90deg, transparent, var(--cp-border), transparent);
+    background: linear-gradient(90deg, transparent, var(--format-border), transparent);
   }
-  #chicpage img {
+  .platport-content img {
     display: block;
     max-width: 100%;
     height: auto;
     margin: 1.45em auto;
-    border-radius: var(--cp-image-radius, 12px);
+    border-radius: var(--format-image-radius, 12px);
   }
-  #chicpage table {
+  .platport-content table {
     width: 100%;
     margin: 1.45em 0;
     border-collapse: collapse;
     overflow: hidden;
     font-size: 0.92em;
   }
-  #chicpage th,
-  #chicpage td {
-    border: 1px solid var(--cp-border);
+  .platport-content th,
+  .platport-content td {
+    border: 1px solid var(--format-border);
     padding: 10px 12px;
     text-align: left;
   }
-  #chicpage th {
-    background: var(--cp-accent-soft);
-    color: var(--cp-ink);
+  .platport-content th {
+    background: var(--format-accent-soft);
+    color: var(--format-ink);
     font-weight: 720;
   }
-  #chicpage code {
-    font-family: var(--cp-mono);
+  .platport-content .poster-table {
+    display: grid;
+    width: 100%;
+    margin: 1.45em 0;
+    border-top: 1px solid var(--format-border);
+    font-size: 0.92em;
+    line-height: 1.48;
+  }
+  .platport-content .poster-table-row {
+    display: grid;
+    grid-template-columns: var(--poster-table-columns, repeat(2, minmax(0, 1fr)));
+    gap: 1.1em;
+    align-items: start;
+    padding: 0.78em 0;
+    border-bottom: 1px solid var(--format-border);
+  }
+  .platport-content .poster-table-head {
+    background: var(--format-accent-soft);
+    font-weight: 720;
+  }
+  .platport-content .poster-table-cell {
+    min-width: 0;
+    padding: 0 0.2em;
+    color: var(--format-ink);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    text-align: left;
+  }
+  .platport-content .poster-table-body-row .poster-table-cell:first-child {
+    font-weight: 700;
+  }
+  .platport-content .poster-table[data-columns='1'] .poster-table-row {
+    grid-template-columns: 1fr;
+  }
+  .platport-content code {
+    font-family: var(--format-mono);
     font-size: 0.88em;
-    color: var(--cp-code-ink);
-    background: var(--cp-code-bg);
-    border: 1px solid color-mix(in srgb, var(--cp-border) 72%, transparent);
+    color: var(--format-code-ink);
+    background: var(--format-code-bg);
+    border: 1px solid color-mix(in srgb, var(--format-code-border, var(--format-border)) 72%, transparent);
     border-radius: 5px;
     padding: 0.12em 0.36em;
   }
-  #chicpage pre {
+  .platport-content pre {
     margin: 1.5em 0;
     padding: 15px 16px;
     overflow: auto;
-    border: 1px solid var(--cp-border);
+    border: 1px solid var(--format-code-border, var(--format-border));
     border-radius: 8px;
-    background: var(--cp-code-bg);
+    background: var(--format-code-bg);
   }
-  #chicpage pre code {
+  .platport-content pre code {
     display: block;
     padding: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
-    color: var(--cp-code-ink);
+    color: var(--format-code-ink);
     line-height: 1.68;
   }
-  #chicpage mark {
+  .platport-content mark {
     padding: 0.1em 0.24em;
     border-radius: 4px;
     color: inherit;
-    background: var(--cp-mark, #fff0a8);
+    background: var(--format-mark, #fff0a8);
   }
-  #chicpage kbd {
+  .platport-content kbd {
     display: inline-block;
     padding: 2px 6px;
-    border: 1px solid var(--cp-border);
+    border: 1px solid var(--format-border);
     border-bottom-width: 2px;
     border-radius: 5px;
-    background: var(--cp-faint);
-    color: var(--cp-ink);
-    font-family: var(--cp-mono);
+    background: var(--format-faint);
+    color: var(--format-ink);
+    font-family: var(--format-mono);
     font-size: 0.76em;
     line-height: 1.35;
   }
-  #chicpage input[type="checkbox"] {
+  .platport-content input[type="checkbox"] {
     margin-right: 8px;
-    accent-color: var(--cp-accent);
+    accent-color: var(--format-accent);
   }
-  #chicpage .hljs-comment,
-  #chicpage .hljs-quote { color: var(--cp-muted); font-style: italic; }
-  #chicpage .hljs-keyword,
-  #chicpage .hljs-selector-tag,
-  #chicpage .hljs-literal,
-  #chicpage .hljs-title,
-  #chicpage .hljs-section { color: var(--cp-accent); }
-  #chicpage .hljs-string,
-  #chicpage .hljs-attr,
-  #chicpage .hljs-template-variable { color: var(--cp-code-string, #0f766e); }
-  #chicpage .hljs-number,
-  #chicpage .hljs-symbol,
-  #chicpage .hljs-variable { color: var(--cp-code-number, #b45309); }
+  .platport-content .hljs-comment,
+  .platport-content .hljs-quote { color: var(--format-muted); font-style: italic; }
+  .platport-content .hljs-keyword,
+  .platport-content .hljs-selector-tag,
+  .platport-content .hljs-literal,
+  .platport-content .hljs-title,
+  .platport-content .hljs-section { color: var(--format-accent); }
+  .platport-content .hljs-string,
+  .platport-content .hljs-attr,
+  .platport-content .hljs-template-variable { color: var(--format-code-string, #0f766e); }
+  .platport-content .hljs-number,
+  .platport-content .hljs-symbol,
+  .platport-content .hljs-variable { color: var(--format-code-number, #b45309); }
 `;
 
 const fontStacks = {
@@ -196,22 +244,23 @@ const createTheme = (
   theme: Omit<FormatTheme, 'css'> & { extraCss?: string },
 ): FormatTheme => {
   const cssVars = `
-    #chicpage {
-      --cp-bg: ${theme.tokens.bg};
-      --cp-paper: ${theme.tokens.paper};
-      --cp-ink: ${theme.tokens.ink};
-      --cp-muted: ${theme.tokens.muted};
-      --cp-faint: ${theme.tokens.faint};
-      --cp-accent: ${theme.tokens.accent};
-      --cp-accent-soft: ${theme.tokens.accentSoft};
-      --cp-border: ${theme.tokens.border};
-      --cp-quote-bg: ${theme.tokens.quoteBg};
-      --cp-quote-ink: ${theme.tokens.quoteInk};
-      --cp-code-bg: ${theme.tokens.codeBg};
-      --cp-code-ink: ${theme.tokens.codeInk};
-      --cp-font: ${theme.fontFamily};
-      --cp-heading: ${theme.headingFamily};
-      --cp-mono: ${fontStacks.mono};
+    .platport-content {
+      --format-bg: ${theme.tokens.bg};
+      --format-paper: ${theme.tokens.paper};
+      --format-ink: ${theme.tokens.ink};
+      --format-muted: ${theme.tokens.muted};
+      --format-faint: ${theme.tokens.faint};
+      --format-accent: ${theme.tokens.accent};
+      --format-accent-soft: ${theme.tokens.accentSoft};
+      --format-border: ${theme.tokens.border};
+      --format-quote-bg: ${theme.tokens.quoteBg};
+      --format-quote-ink: ${theme.tokens.quoteInk};
+      --format-code-bg: ${theme.tokens.codeBg};
+      --format-code-ink: ${theme.tokens.codeInk};
+      --format-code-border: ${theme.tokens.border};
+      --format-font: ${theme.fontFamily};
+      --format-heading: ${theme.headingFamily};
+      --format-mono: ${fontStacks.mono};
     }
   `;
 
@@ -248,13 +297,170 @@ export const FORMAT_THEMES: FormatTheme[] = [
       posterFrame: '#ffffff',
     },
     extraCss: `
-      #chicpage h1 { font-size: 2em; }
-      #chicpage h2 {
+      .platport-content h1 { font-size: 2em; }
+      .platport-content h2 {
         padding-left: 12px;
-        border-left: 5px solid var(--cp-accent);
+        border-left: 5px solid var(--format-accent);
       }
-      #chicpage blockquote {
+      .platport-content blockquote {
         border-left: 0;
+      }
+    `,
+  }),
+  createTheme({
+    id: 'platport-dark',
+    name: '暗黑阅读',
+    description: '黑底高对比，适合观点长文和技术复盘。',
+    preview: '#111111',
+    fontFamily: fontStacks.sans,
+    headingFamily: fontStacks.sans,
+    containerStyle:
+      'max-width:677px;margin:0 auto;background:#111111;color:#f2f2f2;font-family:"Google Sans","Product Sans","Noto Sans SC","PingFang SC","Hiragino Sans GB",Arial,sans-serif;',
+    tokens: {
+      bg: '#191919',
+      paper: '#111111',
+      ink: '#f2f2f2',
+      muted: '#b8b8b8',
+      faint: '#1d1d1d',
+      accent: '#f5f5f5',
+      accentSoft: '#242424',
+      border: '#3f3f3f',
+      quoteBg: '#191919',
+      quoteInk: '#d7d7d7',
+      codeBg: '#191919',
+      codeInk: '#f3f5f7',
+      posterBg: '#111111',
+      posterFrame: '#111111',
+    },
+    extraCss: `
+      .platport-content h2 {
+        color: var(--format-ink);
+        padding-left: 12px;
+        border-left: 5px solid var(--format-accent);
+      }
+      .platport-content blockquote {
+        border: 1px solid var(--format-border);
+      }
+      .platport-content hr {
+        background: linear-gradient(90deg, transparent, var(--format-border), transparent);
+      }
+    `,
+  }),
+  createTheme({
+    id: 'platport-paper',
+    name: '古典纸纹',
+    description: '米白纸面和宋体标题，适合读书笔记。',
+    preview: '#f7f4ee',
+    fontFamily: fontStacks.serif,
+    headingFamily: fontStacks.serif,
+    containerStyle:
+      'max-width:677px;margin:0 auto;background:#f7f4ee;color:#2f241b;font-family:"Noto Serif SC","Songti SC","STSong","SimSun","Times New Roman",serif;',
+    tokens: {
+      bg: '#ede6d8',
+      paper: '#f7f4ee',
+      ink: '#2f241b',
+      muted: '#7c6f61',
+      faint: '#eee7da',
+      accent: '#7b4b24',
+      accentSoft: '#eadcc9',
+      border: '#d8c8b6',
+      quoteBg: '#efe7da',
+      quoteInk: '#5b4635',
+      codeBg: '#efe7da',
+      codeInk: '#3f3024',
+      posterBg: '#f7f4ee',
+      posterFrame: '#f7f4ee',
+    },
+    extraCss: `
+      .platport-content {
+        background:
+          radial-gradient(circle at 18% 8%, rgba(123, 75, 36, 0.08) 0 1px, transparent 2px),
+          radial-gradient(circle at 72% 46%, rgba(123, 75, 36, 0.06) 0 1px, transparent 2px),
+          var(--format-paper);
+        background-size: 64px 64px, 90px 90px, auto;
+      }
+      .platport-content h2 {
+        color: var(--format-accent);
+      }
+      .platport-content blockquote {
+        border: 1px solid var(--format-border);
+      }
+    `,
+  }),
+  createTheme({
+    id: 'platport-note',
+    name: '备忘录',
+    description: '清爽系统感，适合教程和清单。',
+    preview: '#ffffff',
+    fontFamily: fontStacks.sans,
+    headingFamily: fontStacks.sans,
+    containerStyle:
+      'max-width:677px;margin:0 auto;background:#ffffff;color:#1f2937;font-family:"Google Sans","Product Sans","Noto Sans SC","PingFang SC","Hiragino Sans GB",Arial,sans-serif;',
+    tokens: {
+      bg: '#f1f2f4',
+      paper: '#ffffff',
+      ink: '#1f2937',
+      muted: '#6b7280',
+      faint: '#f5f5f7',
+      accent: '#0a84ff',
+      accentSoft: '#eaf4ff',
+      border: '#e5e7eb',
+      quoteBg: '#f5f5f7',
+      quoteInk: '#4b5563',
+      codeBg: '#f5f5f7',
+      codeInk: '#243042',
+      posterBg: '#ffffff',
+      posterFrame: '#ffffff',
+    },
+    extraCss: `
+      .platport-content h2 {
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--format-border);
+      }
+      .platport-content blockquote {
+        border-left: 4px solid var(--format-accent);
+        border-radius: 8px;
+      }
+    `,
+  }),
+  createTheme({
+    id: 'platport-blue',
+    name: '蓝色标注',
+    description: '蓝色强调块，适合观点拆解和方法论。',
+    preview: '#0a7cff',
+    fontFamily: fontStacks.sans,
+    headingFamily: fontStacks.sans,
+    containerStyle:
+      'max-width:677px;margin:0 auto;background:#f8fbff;color:#162033;font-family:"Google Sans","Product Sans","Noto Sans SC","PingFang SC","Hiragino Sans GB",Arial,sans-serif;',
+    tokens: {
+      bg: '#e9f1fb',
+      paper: '#f8fbff',
+      ink: '#162033',
+      muted: '#5c6b81',
+      faint: '#eef6ff',
+      accent: '#0a7cff',
+      accentSoft: '#dcecff',
+      border: '#c9ddf4',
+      quoteBg: '#eaf4ff',
+      quoteInk: '#1f4e8c',
+      codeBg: '#eaf4ff',
+      codeInk: '#17324d',
+      posterBg: '#f8fbff',
+      posterFrame: '#f8fbff',
+    },
+    extraCss: `
+      .platport-content h2 {
+        display: inline;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+        background: var(--format-accent-soft);
+        line-height: 1.5;
+      }
+      .platport-content h2 + * {
+        margin-top: 1em;
+      }
+      .platport-content blockquote {
+        border-left: 5px solid var(--format-accent);
       }
     `,
   }),

@@ -38,8 +38,7 @@ function createMeasureRoot(ratio: PosterRatio, fontFamily: string) {
   page.style.aspectRatio = `${PAGE_WIDTH} / ${PAGE_HEIGHTS[ratio]}`;
 
   const content = document.createElement('div');
-  content.id = 'chicpage';
-  content.className = 'poster-content';
+  content.className = 'poster-content poster-rich-content';
   content.style.fontFamily = fontFamily;
 
   page.appendChild(content);
