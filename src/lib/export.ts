@@ -1,6 +1,3 @@
-import JSZip from 'jszip';
-import { toPng } from 'html-to-image';
-
 const STYLE_PROPERTIES = [
   'color',
   'fontSize',
@@ -28,9 +25,6 @@ const STYLE_PROPERTIES = [
   'paddingBottom',
   'paddingLeft',
   'maxWidth',
-  'maxHeight',
-  'overflowX',
-  'overflowY',
   'background',
   'backgroundColor',
   'backgroundImage',
@@ -44,8 +38,19 @@ const STYLE_PROPERTIES = [
   'borderLeft',
   'borderRadius',
   'borderCollapse',
+  'tableLayout',
   'boxShadow',
   'opacity',
+  'gap',
+  'alignItems',
+  'justifyContent',
+  'gridTemplateColumns',
+  'flex',
+  'flexGrow',
+  'flexShrink',
+  'flexBasis',
+  'float',
+  'clear',
   'listStyleType',
   'listStylePosition',
   'verticalAlign',
@@ -86,12 +91,17 @@ function applyWechatOptimizations(element: HTMLElement, computed: CSSStyleDeclar
   const tag = element.tagName;
 
   if (tag === 'IMG') {
+    element.removeAttribute('width');
+    element.removeAttribute('height');
+    element.style.width = '100%';
     element.style.maxWidth = '100%';
     element.style.height = 'auto';
     element.style.display = 'block';
-    element.style.margin = element.style.margin || '1.5em auto';
+    element.style.margin = '0 auto';
     element.style.border = 'none';
     element.style.outline = 'none';
+    element.style.clear = 'both';
+    element.style.float = 'none';
     element.setAttribute('data-darkmode-bgcolor', 'transparent');
     element.setAttribute('data-darkmode-original-bgcolor', 'transparent');
     return;
@@ -123,7 +133,9 @@ function applyWechatOptimizations(element: HTMLElement, computed: CSSStyleDeclar
   }
 
   if (tag === 'P') {
-    element.style.lineHeight = element.style.lineHeight || '1.75';
+    element.style.margin = '1.2em 0';
+    element.style.lineHeight = '1.75';
+    element.style.textAlign = 'justify';
     return;
   }
 
@@ -140,7 +152,7 @@ function applyWechatOptimizations(element: HTMLElement, computed: CSSStyleDeclar
   }
 
   if (tag === 'LI') {
-    element.style.lineHeight = element.style.lineHeight || '1.75';
+    element.style.lineHeight = '1.75';
     element.style.listStylePosition = element.style.listStylePosition || 'outside';
     return;
   }
@@ -171,6 +183,40 @@ function applyWechatOptimizations(element: HTMLElement, computed: CSSStyleDeclar
   }
 }
 
+function styleWechatImageBlock(block: HTMLElement) {
+  block.style.boxSizing = 'border-box';
+  block.style.width = '100%';
+  block.style.maxWidth = '100%';
+  block.style.margin = '24px 0';
+  block.style.padding = '0';
+  block.style.clear = 'both';
+  block.style.textAlign = 'center';
+  block.style.lineHeight = '0';
+  block.style.fontSize = '0';
+}
+
+function isImageOnlyBlock(element: HTMLElement, image: HTMLImageElement) {
+  const children = Array.from(element.children);
+  return children.length === 1 && children[0] === image && !element.textContent?.trim();
+}
+
+function normalizeWechatImageBlocks(root: HTMLElement) {
+  const images = Array.from(root.querySelectorAll('img'));
+
+  images.forEach((image) => {
+    const parent = image.parentElement;
+    if (parent && ['P', 'DIV', 'SECTION'].includes(parent.tagName) && isImageOnlyBlock(parent, image)) {
+      styleWechatImageBlock(parent);
+      return;
+    }
+
+    const wrapper = document.createElement('p');
+    styleWechatImageBlock(wrapper);
+    image.replaceWith(wrapper);
+    wrapper.appendChild(image);
+  });
+}
+
 interface InlineOptions {
   rootCssText?: string;
 }
@@ -199,6 +245,8 @@ export function inlineComputedStyles(source: HTMLElement, options: InlineOptions
 
     applyWechatOptimizations(target, computed);
   });
+
+  normalizeWechatImageBlocks(clone);
 
   if (options.rootCssText) {
     clone.style.cssText += `;${options.rootCssText}`;
@@ -247,6 +295,10 @@ export function exportMarkdown(markdown: string) {
 }
 
 export async function exportPosterImages(nodes: HTMLElement[]) {
+  const [{ default: JSZip }, { toPng }] = await Promise.all([
+    import('jszip'),
+    import('html-to-image'),
+  ]);
   const zip = new JSZip();
 
   for (const [index, node] of nodes.entries()) {

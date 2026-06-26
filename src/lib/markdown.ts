@@ -3,6 +3,8 @@ import type { Element, Root } from 'hast';
 import type { Node } from 'unist';
 import { visit } from 'unist-util-visit';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import type { Schema } from 'hast-util-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
@@ -112,9 +114,63 @@ function getTableRows(table: Element) {
   return rows.filter((row) => row.cells.length > 0);
 }
 
-function getPosterTableColumns(count: number) {
-  return `repeat(${Math.max(1, count)}, minmax(0, 1fr))`;
-}
+const sanitizedMarkdownSchema: Schema = {
+  ...defaultSchema,
+  tagNames: [
+    ...(defaultSchema.tagNames ?? []),
+    'mark',
+    'sub',
+    'sup',
+  ],
+  attributes: {
+    ...defaultSchema.attributes,
+    '*': [
+      ...(defaultSchema.attributes?.['*'] ?? []),
+      'aria-label',
+      'role',
+      ['className', /^hljs(?:-[\w-]+)?$/, /^language-[\w-]+$/, 'contains-task-list', 'task-list-item'],
+    ],
+    a: [
+      ...(defaultSchema.attributes?.a ?? []),
+      'href',
+      'title',
+    ],
+    img: [
+      ...(defaultSchema.attributes?.img ?? []),
+      'src',
+      'alt',
+      'title',
+      'width',
+      'height',
+      'data-local-image-index',
+    ],
+    input: [
+      ...(defaultSchema.attributes?.input ?? []),
+      ['type', 'checkbox'],
+      ['checked', true, 'checked'],
+      ['disabled', true, 'disabled'],
+    ],
+    div: [
+      ...(defaultSchema.attributes?.div ?? []),
+      ['className', 'poster-table', 'poster-table-row', 'poster-table-head', 'poster-table-body-row', 'poster-table-cell'],
+      ['role', 'table', 'row', 'columnheader', 'cell'],
+      ['data-columns', '1', '2', '3', '4', '5', '6'],
+    ],
+    hr: [
+      ...(defaultSchema.attributes?.hr ?? []),
+      ['data-pagebreak', 'true'],
+    ],
+    code: [
+      ...(defaultSchema.attributes?.code ?? []),
+      ['className', /^language-[\w-]+$/, 'hljs'],
+    ],
+  },
+  protocols: {
+    ...defaultSchema.protocols,
+    href: ['http', 'https', 'mailto', 'tel'],
+    src: ['http', 'https', 'data', 'platport-asset'],
+  },
+};
 
 function rehypePosterTableRows() {
   return (tree: Root) => {
@@ -133,7 +189,6 @@ function rehypePosterTableRows() {
           className: ['poster-table'],
           role: 'table',
           'data-columns': String(columnCount),
-          style: `--poster-table-columns: ${getPosterTableColumns(columnCount)}`,
         },
         children: rows.map((row) => ({
           type: 'element',
@@ -177,6 +232,7 @@ export async function markdownToHtml(
     .use(remarkImageSizePlugin)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
+    .use(rehypeSanitize, sanitizedMarkdownSchema)
     .use(rehypeHighlightedCodeBlock);
 
   if (options.posterTables) {

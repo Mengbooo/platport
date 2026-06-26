@@ -150,7 +150,6 @@ button:disabled {
 }
 
 .workspace-sidebar button:active,
-.theme-row:active,
 .palette-card:active,
 .thumb-strip button:active,
 .cover-uploader:active {
@@ -701,15 +700,18 @@ button:disabled {
   font-size: 12px;
 }
 
-.wechat-image-button {
+.wechat-control-button {
   width: 100%;
   height: 36px;
   justify-content: center;
   gap: 7px;
-  border-style: dashed;
   color: var(--foreground);
   font-size: 13px;
   font-weight: 600;
+}
+
+.wechat-control-button:first-of-type {
+  border-style: dashed;
 }
 
 .export-button {
@@ -1201,6 +1203,266 @@ button:disabled {
   box-shadow: none;
 }
 
+.wechat-preview-content.platport-content > *:first-child {
+  margin-top: 0;
+}
+
+.wechat-preview-content.platport-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.wechat-preview-content.platport-content h1 {
+  display: none;
+}
+
+.wechat-preview-content.platport-content h2 {
+  margin: 1.05em 0 0.56em;
+  color: var(--article-ink);
+  font-family: var(--article-heading);
+  font-size: 1.22em;
+  font-weight: 800;
+  line-height: 1.32;
+}
+
+.wechat-preview-content.platport-content h3,
+.wechat-preview-content.platport-content h4 {
+  margin: 0.92em 0 0.42em;
+  color: var(--article-ink);
+  font-family: var(--article-heading);
+  font-size: 1.04em;
+  font-weight: 760;
+  line-height: 1.38;
+}
+
+.wechat-preview-content.platport-content p,
+.wechat-preview-content.platport-content li {
+  margin: 0.66em 0;
+  color: var(--article-ink);
+  line-height: 1.72;
+}
+
+.wechat-preview-content.platport-content ul,
+.wechat-preview-content.platport-content ol {
+  margin: 0.72em 0;
+  padding-left: 1.26em;
+}
+
+.wechat-preview-content.platport-content li {
+  padding-left: 0.08em;
+}
+
+.wechat-preview-content.platport-content li::marker {
+  color: var(--poster-accent);
+  font-weight: 760;
+}
+
+.wechat-preview-content.platport-content ul.contains-task-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.wechat-preview-content.platport-content li:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  list-style: none;
+  padding-left: 0;
+}
+
+.wechat-preview-content.platport-content li input[type="checkbox"] {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 0.96em;
+  height: 0.96em;
+  margin: 0;
+  appearance: none;
+  place-content: center;
+  border: 1.5px solid color-mix(in srgb, var(--article-muted) 52%, transparent);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.wechat-preview-content.platport-content li input[type="checkbox"]:checked {
+  border-color: var(--poster-accent);
+  background:
+    radial-gradient(circle, var(--poster-accent) 0 43%, transparent 46%),
+    transparent;
+}
+
+.wechat-preview-content.platport-content blockquote {
+  margin: 1em 0;
+  padding: 0.78em 0.92em;
+  border: 1px solid color-mix(in srgb, var(--poster-quote-border) 58%, transparent);
+  border-left: 4px solid var(--poster-quote-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--poster-quote-bg) 74%, var(--article-paper) 26%);
+  color: var(--poster-quote-ink);
+  text-align: left;
+}
+
+.wechat-preview-content.platport-content blockquote p {
+  margin: 0.42em 0;
+  color: inherit;
+  font-style: italic;
+  line-height: inherit;
+}
+
+.wechat-preview-content.platport-content strong {
+  color: var(--article-ink);
+  font-weight: 780;
+}
+
+.wechat-preview-content.platport-content em {
+  color: inherit;
+  font-style: italic;
+}
+
+.wechat-preview-content.platport-content del {
+  color: var(--article-muted);
+  text-decoration: line-through;
+}
+
+.wechat-preview-content.platport-content table {
+  width: 100%;
+  margin: 0.96em 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-top: 1px solid color-mix(in srgb, var(--article-border) 78%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--article-border) 72%, transparent);
+  font-size: 0.9em;
+  line-height: 1.48;
+}
+
+.wechat-preview-content.platport-content th,
+.wechat-preview-content.platport-content td {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--article-border) 66%, transparent);
+  padding: 0.68em 0.74em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  vertical-align: top;
+  text-align: left;
+}
+
+.wechat-preview-content.platport-content th {
+  background: color-mix(in srgb, var(--article-faint) 76%, var(--article-paper) 24%);
+  color: var(--article-ink);
+  font-weight: 780;
+}
+
+.wechat-preview-content.platport-content tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.wechat-preview-content.platport-content tbody td:first-child {
+  color: var(--article-ink);
+  font-weight: 760;
+}
+
+.wechat-preview-content.platport-content .poster-table {
+  display: grid;
+  width: 100%;
+  margin: 0.9em 0;
+  border-top: 1px solid color-mix(in srgb, var(--article-border) 78%, transparent);
+  font-size: 0.92em;
+  line-height: 1.48;
+}
+
+.wechat-preview-content.platport-content .poster-table-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1em;
+  align-items: start;
+  padding: 0.72em 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--article-border) 72%, transparent);
+}
+
+.wechat-preview-content.platport-content .poster-table-head {
+  padding-top: 0.56em;
+  font-weight: 820;
+}
+
+.wechat-preview-content.platport-content .poster-table-cell {
+  min-width: 0;
+  color: var(--article-ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: left;
+}
+
+.wechat-preview-content.platport-content .poster-table-body-row .poster-table-cell:first-child {
+  font-weight: 780;
+}
+
+.wechat-preview-content.platport-content .poster-table[data-columns='1'] .poster-table-row {
+  grid-template-columns: 1fr;
+}
+
+.wechat-preview-content.platport-content .poster-table[data-columns='3'] .poster-table-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wechat-preview-content.platport-content .poster-table[data-columns='4'] .poster-table-row,
+.wechat-preview-content.platport-content .poster-table[data-columns='5'] .poster-table-row,
+.wechat-preview-content.platport-content .poster-table[data-columns='6'] .poster-table-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8em;
+  font-size: 0.9em;
+}
+
+.wechat-preview-content.platport-content pre {
+  max-width: 100%;
+  margin: 0.9em 0;
+  overflow: hidden;
+  border: 1px solid var(--article-code-border);
+  border-radius: 8px;
+  background: var(--article-code-bg);
+  color: var(--article-code-ink);
+  font-size: 0.86em;
+  line-height: 1.56;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wechat-preview-content.platport-content pre code {
+  display: block;
+  padding: 0.82em;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--article-code-ink);
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+}
+
+.wechat-preview-content.platport-content code {
+  border: 1px solid color-mix(in srgb, var(--article-code-border) 74%, transparent);
+  border-radius: 4px;
+  background: var(--article-code-bg);
+  color: var(--article-code-ink);
+  font-size: 0.86em;
+  overflow-wrap: anywhere;
+  padding: 0.08em 0.3em;
+}
+
+.wechat-preview-content.platport-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1em auto;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.wechat-preview-content .wechat-insert-anchor {
+  position: relative;
+  border-radius: 8px;
+  outline: 2px solid var(--article-ink);
+  outline-offset: 4px;
+  background: color-mix(in srgb, var(--article-faint) 76%, var(--article-paper));
+}
+
 .wechat-phone-article {
   width: 100%;
   min-height: 100%;
@@ -1465,12 +1727,12 @@ button:disabled {
 
 .poster-card .poster-rich-content blockquote {
   margin: 0.8em 0;
-  padding: 0.68em 0.82em;
-  border: 1px solid color-mix(in srgb, var(--poster-quote-border) 72%, transparent);
-  border-left: 4px solid var(--poster-quote-border);
+  padding: 0.7em 0.84em;
+  border: 1px solid color-mix(in srgb, var(--poster-border) 72%, transparent);
+  border-left: 4px solid color-mix(in srgb, var(--poster-accent) 56%, var(--poster-border) 44%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--poster-quote-bg) 88%, var(--poster-frame) 12%);
-  color: var(--poster-quote-ink);
+  background: color-mix(in srgb, var(--poster-surface) 84%, var(--poster-frame) 16%);
+  color: var(--poster-ink);
   text-align: left;
 }
 
@@ -1483,20 +1745,10 @@ button:disabled {
   line-height: inherit;
 }
 
-.poster-card .poster-rich-content blockquote p::before {
-  content: "\"";
-  color: var(--poster-accent);
-}
-
-.poster-card .poster-rich-content blockquote p::after {
-  content: "\"";
-  color: var(--poster-accent);
-}
-
 .poster-card .poster-rich-content blockquote cite {
   display: block;
   margin-top: 0.86em;
-  color: color-mix(in srgb, var(--poster-muted) 72%, transparent);
+  color: color-mix(in srgb, var(--poster-muted) 76%, transparent);
   font-family: var(--typeface);
   font-size: 0.64em;
   font-style: normal;
@@ -1556,7 +1808,7 @@ button:disabled {
 
 .poster-card .poster-rich-content .poster-table-row {
   display: grid;
-  grid-template-columns: var(--poster-table-columns, repeat(2, minmax(0, 1fr)));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.2em;
   align-items: start;
   justify-content: space-between;
@@ -1585,10 +1837,14 @@ button:disabled {
   grid-template-columns: 1fr;
 }
 
-.poster-card .poster-rich-content .poster-table[data-columns='3'] .poster-table-row,
+.poster-card .poster-rich-content .poster-table[data-columns='3'] .poster-table-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .poster-card .poster-rich-content .poster-table[data-columns='4'] .poster-table-row,
 .poster-card .poster-rich-content .poster-table[data-columns='5'] .poster-table-row,
 .poster-card .poster-rich-content .poster-table[data-columns='6'] .poster-table-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.8em;
   font-size: 0.84em;
 }
@@ -1597,9 +1853,9 @@ button:disabled {
   max-width: 100%;
   margin: 0.72em 0;
   overflow: hidden;
-  border: 1px solid var(--poster-code-border);
+  border: 1px solid color-mix(in srgb, var(--poster-border) 76%, transparent);
   border-radius: 8px;
-  background: var(--poster-code-bg);
+  background: color-mix(in srgb, var(--poster-surface) 88%, var(--poster-frame) 12%);
   color: var(--poster-code-ink);
   font-size: 0.78em;
   line-height: 1.5;
@@ -1618,10 +1874,10 @@ button:disabled {
   white-space: pre-wrap;
 }
 
-.poster-card .poster-rich-content code {
-  border: 1px solid color-mix(in srgb, var(--poster-code-border) 74%, transparent);
+.poster-card .poster-rich-content :not(pre) > code {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 72%, transparent);
   border-radius: 4px;
-  background: var(--poster-code-bg);
+  background: color-mix(in srgb, var(--poster-surface) 90%, var(--poster-frame) 10%);
   color: var(--poster-code-ink);
   font-size: 0.82em;
   overflow-wrap: anywhere;
@@ -1714,9 +1970,22 @@ button:disabled {
 }
 
 .poster-card[data-theme='dark-reader'] .poster-rich-content blockquote {
-  border-color: color-mix(in srgb, var(--poster-quote-border) 76%, transparent);
-  background: color-mix(in srgb, var(--poster-quote-bg) 84%, #000 16%);
+  border-color: color-mix(in srgb, var(--poster-border) 72%, transparent);
+  border-left-color: color-mix(in srgb, var(--poster-accent) 68%, var(--poster-border) 32%);
+  background: color-mix(in srgb, var(--poster-surface) 82%, var(--poster-frame) 18%);
+  color: var(--poster-ink);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.poster-card[data-theme='dark-reader'] .poster-rich-content pre {
+  border-color: color-mix(in srgb, var(--poster-border) 78%, transparent);
+  background: color-mix(in srgb, var(--poster-surface) 86%, var(--poster-frame) 14%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.poster-card[data-theme='dark-reader'] .poster-rich-content :not(pre) > code {
+  border-color: color-mix(in srgb, var(--poster-border) 72%, transparent);
+  background: color-mix(in srgb, var(--poster-surface) 86%, var(--poster-frame) 14%);
 }
 
 .poster-card[data-theme='classic-paper'] {
@@ -1749,34 +2018,46 @@ button:disabled {
 }
 
 .poster-card[data-theme='classic-paper'] .poster-rich-content blockquote {
-  border: 1px solid color-mix(in srgb, var(--poster-quote-border) 72%, transparent);
-  border-radius: 3px 12px 12px 3px;
-  background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--poster-accent) 12%, transparent) 0 1px, transparent 2px),
-    color-mix(in srgb, var(--poster-quote-bg) 70%, var(--poster-frame) 30%);
+  border: 1px solid color-mix(in srgb, var(--poster-border) 72%, transparent);
+  border-left: 4px solid color-mix(in srgb, var(--poster-accent) 48%, var(--poster-border) 52%);
+  border-radius: 4px 8px 8px 4px;
+  background: color-mix(in srgb, var(--poster-surface) 72%, var(--poster-frame) 28%);
+  color: var(--poster-ink);
   font-family: var(--typeface);
 }
 
+.poster-card[data-theme='classic-paper'] .poster-rich-content pre {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 74%, transparent);
+  border-left-width: 4px;
+  border-radius: 4px 8px 8px 4px;
+  background: color-mix(in srgb, var(--poster-surface) 76%, var(--poster-frame) 24%);
+}
+
+.poster-card[data-theme='classic-paper'] .poster-rich-content :not(pre) > code {
+  border-color: color-mix(in srgb, var(--poster-border) 68%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--poster-surface) 80%, var(--poster-frame) 20%);
+}
+
 .poster-card[data-theme='ios-note'] {
-  border-color: #f1f1f3;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+  border-color: color-mix(in srgb, var(--poster-border) 86%, var(--poster-frame) 14%);
+  background: color-mix(in srgb, var(--poster-surface) 78%, var(--poster-frame) 22%);
 }
 
 .poster-card[data-theme='ios-note'] .cover-layout,
 .poster-card[data-theme='ios-note'] .poster-content {
-  background: #fff;
+  background: color-mix(in srgb, var(--poster-surface) 84%, var(--poster-frame) 16%);
 }
 
 .poster-card[data-theme='ios-note'] .cover-media {
   max-height: 34%;
-  border-bottom: 1px solid #f1f1f3;
+  border-bottom: 1px solid color-mix(in srgb, var(--poster-border) 82%, var(--poster-frame) 18%);
   background: var(--poster-image-bg);
 }
 
 .poster-card[data-theme='ios-note'] .cover-copy {
   align-content: start;
+  gap: 18px;
   padding-top: 48px;
 }
 
@@ -1786,11 +2067,26 @@ button:disabled {
 }
 
 .poster-card[data-theme='ios-note'] .poster-rich-content blockquote {
-  border: 0;
-  border-left: 4px solid var(--poster-quote-border);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--poster-quote-bg) 78%, #fff 22%);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--poster-border) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--poster-border) 70%, transparent);
+  border-left: 4px solid color-mix(in srgb, var(--poster-accent) 52%, var(--poster-border) 48%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--poster-surface) 86%, var(--poster-frame) 14%);
+  color: var(--poster-ink);
+  box-shadow: none;
+}
+
+.poster-card[data-theme='ios-note'] .poster-rich-content pre {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 72%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--poster-surface) 88%, var(--poster-frame) 12%);
+  box-shadow: none;
+}
+
+.poster-card[data-theme='ios-note'] .poster-rich-content :not(pre) > code {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 66%, transparent);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--poster-surface) 90%, var(--poster-frame) 10%);
+  box-shadow: none;
 }
 
 .poster-card[data-theme='blue-marker'] {
@@ -1827,10 +2123,24 @@ button:disabled {
 }
 
 .poster-card[data-theme='blue-marker'] .poster-rich-content blockquote {
-  border: 0;
-  border-left: 5px solid var(--poster-quote-border);
-  border-radius: 0 10px 10px 0;
-  background: linear-gradient(90deg, var(--poster-quote-bg), var(--poster-frame));
+  border: 1px solid color-mix(in srgb, var(--poster-border) 68%, transparent);
+  border-left: 5px solid color-mix(in srgb, var(--poster-accent) 58%, var(--poster-border) 42%);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--poster-surface) 76%, var(--poster-frame) 24%);
+  color: var(--poster-ink);
+}
+
+.poster-card[data-theme='blue-marker'] .poster-rich-content pre {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 68%, transparent);
+  border-left: 5px solid color-mix(in srgb, var(--poster-accent) 58%, var(--poster-border) 42%);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--poster-surface) 82%, var(--poster-frame) 18%);
+}
+
+.poster-card[data-theme='blue-marker'] .poster-rich-content :not(pre) > code {
+  border: 1px solid color-mix(in srgb, var(--poster-border) 64%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--poster-surface) 86%, var(--poster-frame) 14%);
 }
 
 .poster-scroll::-webkit-scrollbar,

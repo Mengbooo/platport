@@ -118,21 +118,35 @@ const BASE_CSS = `
   }
   .platport-content table {
     width: 100%;
-    margin: 1.45em 0;
+    margin: 1.1em 0;
+    table-layout: fixed;
     border-collapse: collapse;
-    overflow: hidden;
-    font-size: 0.92em;
+    border-top: 1px solid var(--format-border);
+    border-bottom: 1px solid var(--format-border);
+    font-size: 0.9em;
+    line-height: 1.48;
   }
   .platport-content th,
   .platport-content td {
-    border: 1px solid var(--format-border);
-    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--format-border);
+    padding: 0.68em 0.74em;
     text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .platport-content th {
-    background: var(--format-accent-soft);
+    background: var(--format-faint);
     color: var(--format-ink);
-    font-weight: 720;
+    font-weight: 780;
+  }
+  .platport-content tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .platport-content tbody td:first-child {
+    color: var(--format-ink);
+    font-weight: 760;
   }
   .platport-content .poster-table {
     display: grid;
@@ -144,7 +158,7 @@ const BASE_CSS = `
   }
   .platport-content .poster-table-row {
     display: grid;
-    grid-template-columns: var(--poster-table-columns, repeat(2, minmax(0, 1fr)));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.1em;
     align-items: start;
     padding: 0.78em 0;
@@ -167,6 +181,14 @@ const BASE_CSS = `
   }
   .platport-content .poster-table[data-columns='1'] .poster-table-row {
     grid-template-columns: 1fr;
+  }
+  .platport-content .poster-table[data-columns='3'] .poster-table-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .platport-content .poster-table[data-columns='4'] .poster-table-row,
+  .platport-content .poster-table[data-columns='5'] .poster-table-row,
+  .platport-content .poster-table[data-columns='6'] .poster-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .platport-content code {
     font-family: var(--format-mono);
@@ -301,9 +323,6 @@ export const FORMAT_THEMES: FormatTheme[] = [
       .platport-content h2 {
         padding-left: 12px;
         border-left: 5px solid var(--format-accent);
-      }
-      .platport-content blockquote {
-        border-left: 0;
       }
     `,
   }),
@@ -584,13 +603,13 @@ export const POSTER_PALETTES: Record<PosterThemeId, PosterPalette[]> = {
       name: '系统蓝',
       description: '接近 iOS 默认蓝。',
       preview: '#0a84ff',
-      bg: '#ffffff',
-      frame: '#ffffff',
+      bg: '#f3f8ff',
+      frame: '#f8fbff',
       ink: '#303033',
       muted: '#575b60',
       accent: '#0a84ff',
-      border: '#e5e5ea',
-      surface: '#f7f7f8',
+      border: '#dcecff',
+      surface: '#eaf4ff',
       imageBackdrop: 'linear-gradient(135deg, #e8f3ff, #ffffff)',
     },
     {
@@ -598,13 +617,13 @@ export const POSTER_PALETTES: Record<PosterThemeId, PosterPalette[]> = {
       name: '灰阶',
       description: '弱化蓝色，偏沉稳。',
       preview: '#8e8e93',
-      bg: '#ffffff',
-      frame: '#ffffff',
+      bg: '#f4f4f6',
+      frame: '#fbfbfc',
       ink: '#2c2c2e',
       muted: '#636366',
       accent: '#8e8e93',
-      border: '#e4e4e7',
-      surface: '#f7f7f8',
+      border: '#d9d9de',
+      surface: '#ececef',
       imageBackdrop: 'linear-gradient(135deg, #eceef2, #ffffff)',
     },
     {
@@ -612,8 +631,8 @@ export const POSTER_PALETTES: Record<PosterThemeId, PosterPalette[]> = {
       name: '薄荷',
       description: '清爽备忘录感。',
       preview: '#30d158',
-      bg: '#ffffff',
-      frame: '#ffffff',
+      bg: '#f3fbf5',
+      frame: '#fbfffc',
       ink: '#233128',
       muted: '#5e6a63',
       accent: '#2fbf62',

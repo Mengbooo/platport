@@ -22,6 +22,7 @@ import {
   Sparkles,
   Table2,
   Type,
+  Undo2,
   Upload,
   X,
 } from 'lucide-react';
@@ -41,6 +42,7 @@ import {
   SelectValue,
 } from './components/ui/select';
 import { usePosterPages } from './hooks/usePosterPages';
+import { resolveLocalAssetUrls, saveLocalAsset } from './lib/assets';
 import { copyRichHtml, exportHtml, exportMarkdown, exportPosterImages } from './lib/export';
 import { getStats, markdownToHtml } from './lib/markdown';
 import {
@@ -62,6 +64,8 @@ import type { CodeThemeId, PosterRatio, PosterThemeId, TypefaceId } from './type
 
 const GOOGLE_SANS_STACK =
   '"Google Sans", "Product Sans", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", Arial, sans-serif';
+const MAX_IMAGE_FILE_SIZE = 2 * 1024 * 1024;
+const MAX_ATTACHMENT_FILE_SIZE = 768 * 1024;
 
 type WorkspaceId = 'markdown' | 'xiaohongshu' | 'wechat';
 type MarkdownViewMode = 'edit' | 'preview';
@@ -89,6 +93,10 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+function isWithinFileLimit(file: File, maxSize: number) {
+  return file.size <= maxSize;
+}
+
 function removeFirstHeading(html: string) {
   if (typeof document === 'undefined') {
     return html.replace(/<h1[\s\S]*?<\/h1>/i, '');
@@ -105,7 +113,7 @@ function App() {
     width: typeof window === 'undefined' ? 1440 : window.innerWidth,
     height: typeof window === 'undefined' ? 900 : window.innerHeight,
   }));
-  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('xiaohongshu');
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>('markdown');
   const [markdownViewMode, setMarkdownViewMode] = useState<MarkdownViewMode>('edit');
   const {
     noteTitle,
@@ -119,11 +127,14 @@ function App() {
     posterRatio,
     typeface,
     codeTheme,
+    canUndo,
     setNoteTitle,
     setNoteSummary,
     setNoteBody,
     setHashtags,
     setCoverImage,
+    pushHistory,
+    undo,
     setThemeId,
     setPosterThemeId,
     setPosterPaletteId,
@@ -142,6 +153,7 @@ function App() {
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const wechatImageInputRef = useRef<HTMLInputElement | null>(null);
   const wechatImageAnchorRef = useRef('');
+  const wechatAnchorElementRef = useRef<Element | null>(null);
   const wechatBodyCursorRef = useRef<number | null>(null);
   const wechatBodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const markdownImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -163,7 +175,7 @@ function App() {
     [articleTheme.css],
   );
   const activeWorkspaceConfig =
-    WORKSPACES.find((workspace) => workspace.id === activeWorkspace) ?? WORKSPACES[1];
+    WORKSPACES.find((workspace) => workspace.id === activeWorkspace) ?? WORKSPACES[0];
   const posterTheme = getPosterTheme(posterThemeId);
   const availablePalettes = POSTER_PALETTES[posterThemeId];
   const effectivePaletteId = availablePalettes.some((item) => item.id === posterPaletteId)
@@ -221,13 +233,16 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([markdownToHtml(markdown), markdownToHtml(markdown, { posterTables: true })]).then(
-      ([nextHtml, nextPosterHtml]) => {
+    resolveLocalAssetUrls(markdown).then((resolvedMarkdown) =>
+      Promise.all([
+        markdownToHtml(resolvedMarkdown),
+        markdownToHtml(resolvedMarkdown, { posterTables: true }),
+      ]),
+    ).then(([nextHtml, nextPosterHtml]) => {
         if (cancelled) return;
         setHtml(nextHtml);
         setPosterHtml(nextPosterHtml);
-      },
-    );
+      });
     return () => {
       cancelled = true;
     };
@@ -271,6 +286,10 @@ function App() {
     setStatus(nextStatus);
   };
 
+  const saveEditorHistory = useCallback(() => {
+    pushHistory();
+  }, [pushHistory]);
+
   const handleThemeChange = (nextThemeId: PosterThemeId) => {
     setPosterThemeId(nextThemeId);
     setPosterPaletteId(getDefaultPaletteId(nextThemeId));
@@ -283,9 +302,14 @@ function App() {
       setStatus('请选择图片文件');
       return;
     }
+    if (!isWithinFileLimit(file, MAX_IMAGE_FILE_SIZE)) {
+      setStatus('图片不能超过 2MB');
+      return;
+    }
 
     try {
       const dataUrl = await readFileAsDataUrl(file);
+      saveEditorHistory();
       setCoverImage(dataUrl);
       setActivePoster(0);
       setStatus('Cover updated');
@@ -314,29 +338,37 @@ function App() {
   };
 
   const insertMarkdown = (snippet: string) => {
+    saveEditorHistory();
     markdownEditorRef.current?.insertMarkdown(snippet);
     setStatus('Markdown updated');
   };
 
   const wrapMarkdownSelection = (before: string, after = before) => {
+    saveEditorHistory();
     markdownEditorRef.current?.wrapSelection(before, after);
     setStatus('Markdown updated');
   };
 
   const insertMarkdownLinePrefix = (prefix: string) => {
+    saveEditorHistory();
     markdownEditorRef.current?.insertAtLineStart(prefix);
     setStatus('Markdown updated');
   };
 
   const insertMarkdownAsset = async (file?: File) => {
     if (!file) return;
+    if (!isWithinFileLimit(file, file.type.startsWith('image/') ? MAX_IMAGE_FILE_SIZE : MAX_ATTACHMENT_FILE_SIZE)) {
+      setStatus(file.type.startsWith('image/') ? '图片不能超过 2MB' : '文件不能超过 768KB');
+      return;
+    }
 
     try {
-      const dataUrl = await readFileAsDataUrl(file);
       const safeName = file.name.replace(/[[\]()]/g, '-');
+      const asset = await saveLocalAsset(file);
       const markdownAsset = file.type.startsWith('image/')
-        ? `![${safeName}](${dataUrl})`
-        : `[${safeName}](${dataUrl})`;
+        ? `![${safeName}](${asset.url})`
+        : `[${safeName}](${asset.url})`;
+      saveEditorHistory();
       markdownEditorRef.current?.insertAtCursor(`\n\n${markdownAsset}\n\n`);
       setStatus(file.type.startsWith('image/') ? '图片已插入' : '文件已插入');
       setMarkdownViewMode('edit');
@@ -351,11 +383,15 @@ function App() {
       setStatus('请选择图片文件');
       return;
     }
+    if (!isWithinFileLimit(file, MAX_IMAGE_FILE_SIZE)) {
+      setStatus('图片不能超过 2MB');
+      return;
+    }
 
     try {
-      const dataUrl = await readFileAsDataUrl(file);
       const safeName = file.name.replace(/[[\]()]/g, '-');
-      const imageMarkdown = `\n\n![${safeName}](${dataUrl})\n`;
+      const asset = await saveLocalAsset(file);
+      const imageMarkdown = `\n\n![${safeName}](${asset.url})\n`;
       const cursor = wechatBodyCursorRef.current;
       const anchor = wechatImageAnchorRef.current;
       const index = anchor ? noteBody.indexOf(anchor) : -1;
@@ -365,12 +401,43 @@ function App() {
           : index >= 0
           ? `${noteBody.slice(0, index + anchor.length)}${imageMarkdown}${noteBody.slice(index + anchor.length)}`
           : `${noteBody.trim()}${imageMarkdown}`;
+      saveEditorHistory();
       setNoteBody(nextBody);
       wechatImageAnchorRef.current = '';
       wechatBodyCursorRef.current = null;
+      wechatAnchorElementRef.current?.classList.remove('wechat-insert-anchor');
+      wechatAnchorElementRef.current = null;
       setStatus('图片已插入');
     } catch {
       setStatus('图片读取失败');
+    }
+  };
+
+  const insertMarkdownPastedFiles = async (files: File[]) => {
+    const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+    if (imageFiles.length === 0) return false;
+
+    const oversized = imageFiles.find((file) => !isWithinFileLimit(file, MAX_IMAGE_FILE_SIZE));
+    if (oversized) {
+      setStatus('图片不能超过 2MB');
+      return true;
+    }
+
+    try {
+      const assets = await Promise.all(
+        imageFiles.map(async (file) => {
+          const asset = await saveLocalAsset(file);
+          const safeName = file.name.replace(/[[\]()]/g, '-') || 'clipboard-image.png';
+          return `![${safeName}](${asset.url})`;
+        }),
+      );
+      saveEditorHistory();
+      markdownEditorRef.current?.insertAtCursor(`\n\n${assets.join('\n\n')}\n\n`);
+      setStatus('图片已插入');
+      return true;
+    } catch {
+      setStatus('图片读取失败');
+      return true;
     }
   };
 
@@ -406,15 +473,32 @@ function App() {
       anchorNode && wechatPreviewRef.current?.contains(anchorNode)
         ? selection?.toString().trim()
         : '';
-    if (selectedText) {
+    const element = target instanceof Element ? target : null;
+    const block = element?.closest('p, li, h2, h3, h4, blockquote, pre');
+    const inContent = Boolean(block?.closest('.wechat-preview-content'));
+
+    wechatAnchorElementRef.current?.classList.remove('wechat-insert-anchor');
+    if (block && inContent) {
+      block.classList.add('wechat-insert-anchor');
+      wechatAnchorElementRef.current = block;
+    } else {
+      wechatAnchorElementRef.current = null;
+    }
+
+    if (selectedText && inContent) {
       wechatImageAnchorRef.current = selectedText;
       return;
     }
 
-    const element = target instanceof Element ? target : null;
-    const block = element?.closest('p, li, h2, h3, h4, blockquote, pre');
     wechatImageAnchorRef.current =
-      block && wechatPreviewRef.current?.contains(block) ? block.textContent?.trim() ?? '' : '';
+      block && inContent && wechatPreviewRef.current?.contains(block)
+        ? block.textContent?.trim() ?? ''
+        : '';
+  };
+
+  const undoWechatImageInsert = () => {
+    undo();
+    setStatus('已回退插图');
   };
 
   const copyMarkdownHtml = async () => {
@@ -434,6 +518,9 @@ function App() {
     const node = wechatPreviewRef.current.cloneNode(true) as HTMLElement;
     node.classList.remove('wechat-phone-article');
     node.classList.add('wechat-export-article');
+    node.querySelectorAll('.wechat-insert-anchor').forEach((item) => {
+      item.classList.remove('wechat-insert-anchor');
+    });
     node.querySelector('.wechat-article-header h1')?.remove();
     node.querySelector('.wechat-article-meta')?.remove();
     const header = node.querySelector('.wechat-article-header');
@@ -445,7 +532,7 @@ function App() {
   };
 
   const wechatRootCss =
-    'position:static;left:auto;top:auto;pointer-events:auto;box-sizing:border-box;width:100%;max-width:677px;height:auto;min-height:0;margin:0 auto;padding:24px 22px 32px;overflow:visible;border-radius:0;box-shadow:none;opacity:1;';
+    'position:static;left:auto;top:auto;pointer-events:auto;box-sizing:border-box;width:100%;max-width:677px;height:auto;min-height:0;margin:0 auto;padding:24px 22px 32px;overflow:visible;border-radius:0;box-shadow:none;opacity:1;font-size:15px;line-height:1.8;';
 
   const copyWechatHtml = async () => {
     const node = createWechatExportNode();
@@ -670,6 +757,7 @@ function App() {
                     <input
                       value={noteTitle}
                       maxLength={90}
+                      onFocus={saveEditorHistory}
                       onChange={(event) => {
                         setNoteTitle(event.target.value);
                         markSaved();
@@ -682,6 +770,7 @@ function App() {
                     <textarea
                       value={noteSummary}
                       maxLength={180}
+                      onFocus={saveEditorHistory}
                       onChange={(event) => {
                         setNoteSummary(event.target.value);
                         markSaved();
@@ -696,6 +785,7 @@ function App() {
                       ref={wechatBodyTextareaRef}
                       value={noteBody}
                       onClick={(event) => saveWechatBodyCursor(event.currentTarget)}
+                      onFocus={saveEditorHistory}
                       onKeyUp={(event) => saveWechatBodyCursor(event.currentTarget)}
                       onSelect={(event) => saveWechatBodyCursor(event.currentTarget)}
                       onChange={(event) => {
@@ -779,7 +869,7 @@ function App() {
                         </Select>
                       </div>
                       <Button
-                        className="wechat-image-button"
+                        className="wechat-control-button"
                         variant="outline"
                         size="sm"
                         title="先在预览区选中文本，再上传图片"
@@ -788,6 +878,24 @@ function App() {
                       >
                         <ImagePlus size={14} />
                         选中处插图
+                      </Button>
+                      <Button
+                        className="wechat-control-button"
+                        variant="outline"
+                        size="sm"
+                        disabled={!canUndo}
+                        onClick={undoWechatImageInsert}
+                      >
+                        <Undo2 size={14} />
+                        回退插图
+                      </Button>
+                      <Button className="wechat-control-button" variant="outline" size="sm" onClick={copyWechatHtml}>
+                        <Copy size={14} />
+                        复制 HTML
+                      </Button>
+                      <Button className="wechat-control-button" variant="outline" size="sm" onClick={exportWechatHtml}>
+                        <FileText size={14} />
+                        导出 HTML
                       </Button>
                       <input
                         ref={wechatImageInputRef}
@@ -811,6 +919,7 @@ function App() {
                 <input
                   value={noteTitle}
                   maxLength={90}
+                  onFocus={saveEditorHistory}
                   onChange={(event) => {
                     setNoteTitle(event.target.value);
                     markSaved();
@@ -823,6 +932,7 @@ function App() {
                 <textarea
                   value={noteSummary}
                   maxLength={180}
+                  onFocus={saveEditorHistory}
                   onChange={(event) => {
                     setNoteSummary(event.target.value);
                     markSaved();
@@ -835,6 +945,7 @@ function App() {
                 <span>标签</span>
                 <input
                   value={hashtags}
+                  onFocus={saveEditorHistory}
                   onChange={(event) => {
                     setHashtags(event.target.value);
                     markSaved();
@@ -847,6 +958,7 @@ function App() {
                 <span>Markdown 正文</span>
                 <textarea
                   value={noteBody}
+                  onFocus={saveEditorHistory}
                   onChange={(event) => {
                     setNoteBody(event.target.value);
                     markSaved();
@@ -1002,6 +1114,7 @@ function App() {
                       variant="outline"
                       onClick={(event) => {
                         event.preventDefault();
+                        saveEditorHistory();
                         setCoverImage('');
                         setStatus('Default cover restored');
                       }}
@@ -1126,6 +1239,7 @@ function App() {
                 <input
                   value={noteTitle}
                   maxLength={90}
+                  onFocus={saveEditorHistory}
                   onChange={(event) => {
                     setNoteTitle(event.target.value);
                     markSaved();
@@ -1143,6 +1257,8 @@ function App() {
                     ref={markdownEditorRef}
                     className="markdown-code-host"
                     markdown={noteBody}
+                    onFocus={saveEditorHistory}
+                    onPasteFiles={insertMarkdownPastedFiles}
                     onChange={(nextMarkdown) => {
                       setNoteBody(nextMarkdown);
                       markSaved();
@@ -1172,16 +1288,6 @@ function App() {
               <div>
                 <strong>公众号预览</strong>
                 <span>{stats.characters} 字 · 阅读需 {stats.readingMinutes} 分钟</span>
-              </div>
-              <div className="markdown-toolbar-actions">
-                <Button type="button" variant="outline" size="sm" onClick={copyWechatHtml}>
-                  <Copy size={14} />
-                  复制 HTML
-                </Button>
-                <Button type="button" variant="outline" size="sm" onClick={exportWechatHtml}>
-                  <FileText size={14} />
-                  导出 HTML
-                </Button>
               </div>
             </div>
 

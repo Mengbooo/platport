@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .playwright-cli/
 output/playwright/
+test-results/
+playwright-report/
 
 # Editor directories and files
 .vscode/*

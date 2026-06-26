@@ -49,6 +49,8 @@ export interface MarkdownEditorMethods {
 interface MarkdownCodeEditorProps {
   markdown: string;
   onChange: (markdown: string) => void;
+  onFocus?: () => void;
+  onPasteFiles?: (files: File[]) => Promise<boolean> | boolean;
   className?: string;
 }
 
@@ -163,16 +165,20 @@ const markdownCodeLanguages = (info: string) => {
 };
 
 export const MarkdownCodeEditor = forwardRef<MarkdownEditorMethods, MarkdownCodeEditorProps>(
-  ({ markdown: markdownContent, onChange, className }, ref) => {
+  ({ markdown: markdownContent, onChange, onFocus, onPasteFiles, className }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<EditorView | null>(null);
     const onChangeRef = useRef(onChange);
+    const onFocusRef = useRef(onFocus);
+    const onPasteFilesRef = useRef(onPasteFiles);
     const initialMarkdownRef = useRef(markdownContent);
     const applyingExternalChangeRef = useRef(false);
     const [selectionCoords, setSelectionCoords] = useState<SelectionToolbarCoords | null>(null);
     const [showHighlightColors, setShowHighlightColors] = useState(false);
 
     onChangeRef.current = onChange;
+    onFocusRef.current = onFocus;
+    onPasteFilesRef.current = onPasteFiles;
 
     const updateSelectionToolbar = useCallback((view: EditorView) => {
       const selection = view.state.selection.main;
@@ -409,6 +415,18 @@ export const MarkdownCodeEditor = forwardRef<MarkdownEditorMethods, MarkdownCode
             }
           }),
           EditorView.domEventHandlers({
+            paste: (event) => {
+              const files = Array.from(event.clipboardData?.files ?? []);
+              if (files.length === 0) return false;
+
+              event.preventDefault();
+              void onPasteFilesRef.current?.(files);
+              return true;
+            },
+            focus: () => {
+              onFocusRef.current?.();
+              return false;
+            },
             blur: () => {
               setSelectionCoords(null);
               setShowHighlightColors(false);

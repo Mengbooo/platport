@@ -70,7 +70,11 @@ export const buildMarkdown = (title: string, body: string) =>
   `# ${title.trim() || '未命名笔记'}\n\n${body.trim()}\n`;
 
 interface HistoryItem {
-  markdown: string;
+  noteTitle: string;
+  noteSummary: string;
+  noteBody: string;
+  hashtags: string;
+  coverImage: string;
 }
 
 interface EditorState {
@@ -92,13 +96,15 @@ interface EditorState {
   showChrome: boolean;
   past: HistoryItem[];
   future: HistoryItem[];
+  canUndo: boolean;
+  canRedo: boolean;
   setMarkdown: (markdown: string) => void;
   setNoteTitle: (noteTitle: string) => void;
   setNoteSummary: (noteSummary: string) => void;
   setNoteBody: (noteBody: string) => void;
   setHashtags: (hashtags: string) => void;
   setCoverImage: (coverImage: string) => void;
-  pushHistory: (markdown?: string) => void;
+  pushHistory: () => void;
   undo: () => void;
   redo: () => void;
   setThemeId: (themeId: string) => void;
@@ -134,6 +140,8 @@ export const useEditorStore = create<EditorState>()(
       showChrome: true,
       past: [],
       future: [],
+      canUndo: false,
+      canRedo: false,
       setMarkdown: (markdown) => set({ markdown }),
       setNoteTitle: (noteTitle) =>
         set((state) => ({
@@ -148,13 +156,30 @@ export const useEditorStore = create<EditorState>()(
         })),
       setHashtags: (hashtags) => set({ hashtags }),
       setCoverImage: (coverImage) => set({ coverImage }),
-      pushHistory: (markdown) =>
+      pushHistory: () =>
         set((state) => {
-          const snapshot = markdown ?? state.markdown;
-          if (state.past[state.past.length - 1]?.markdown === snapshot) return state;
+          const snapshot = {
+            noteTitle: state.noteTitle,
+            noteSummary: state.noteSummary,
+            noteBody: state.noteBody,
+            hashtags: state.hashtags,
+            coverImage: state.coverImage,
+          };
+          const previous = state.past[state.past.length - 1];
+          if (
+            previous?.noteTitle === snapshot.noteTitle &&
+            previous.noteSummary === snapshot.noteSummary &&
+            previous.noteBody === snapshot.noteBody &&
+            previous.hashtags === snapshot.hashtags &&
+            previous.coverImage === snapshot.coverImage
+          ) {
+            return state;
+          }
           return {
-            past: [...state.past, { markdown: snapshot }].slice(-60),
+            past: [...state.past, snapshot].slice(-60),
             future: [],
+            canUndo: true,
+            canRedo: false,
           };
         }),
       undo: () =>
@@ -162,9 +187,25 @@ export const useEditorStore = create<EditorState>()(
           const previous = state.past[state.past.length - 1];
           if (!previous) return state;
           return {
-            markdown: previous.markdown,
+            noteTitle: previous.noteTitle,
+            noteSummary: previous.noteSummary,
+            noteBody: previous.noteBody,
+            hashtags: previous.hashtags,
+            coverImage: previous.coverImage,
+            markdown: buildMarkdown(previous.noteTitle, previous.noteBody),
             past: state.past.slice(0, -1),
-            future: [{ markdown: state.markdown }, ...state.future],
+            future: [
+              {
+                noteTitle: state.noteTitle,
+                noteSummary: state.noteSummary,
+                noteBody: state.noteBody,
+                hashtags: state.hashtags,
+                coverImage: state.coverImage,
+              },
+              ...state.future,
+            ],
+            canUndo: state.past.length > 1,
+            canRedo: true,
           };
         }),
       redo: () =>
@@ -172,9 +213,25 @@ export const useEditorStore = create<EditorState>()(
           const next = state.future[0];
           if (!next) return state;
           return {
-            markdown: next.markdown,
-            past: [...state.past, { markdown: state.markdown }],
+            noteTitle: next.noteTitle,
+            noteSummary: next.noteSummary,
+            noteBody: next.noteBody,
+            hashtags: next.hashtags,
+            coverImage: next.coverImage,
+            markdown: buildMarkdown(next.noteTitle, next.noteBody),
+            past: [
+              ...state.past,
+              {
+                noteTitle: state.noteTitle,
+                noteSummary: state.noteSummary,
+                noteBody: state.noteBody,
+                hashtags: state.hashtags,
+                coverImage: state.coverImage,
+              },
+            ],
             future: state.future.slice(1),
+            canUndo: true,
+            canRedo: state.future.length > 1,
           };
         }),
       setThemeId: (themeId) => set({ themeId }),
